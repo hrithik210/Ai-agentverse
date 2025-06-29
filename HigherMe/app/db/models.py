@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 from .database import Base
 
-class User(Base):
+class CodeLog(Base):
   __tablename__ = 'code_logs'
   id = Column(Integer, primary_key=True, index=True)
   lines_added = Column(Integer)
