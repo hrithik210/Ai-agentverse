@@ -28,3 +28,27 @@ def create_health_log(db: Session, meals: str, sleep_hours: float, exercise_minu
   db.commit()
   db.refresh(health_log)
   return health_log
+
+def create_mood_log(db: Session, mood_text: str, sentiment: str):
+  mood_log = models.MoodLog(
+    mood_text = mood_text,
+    sentiment = sentiment,
+    date = datetime.now()
+  )
+  
+  db.add(mood_log)
+  db.commit()
+  db.refresh(mood_log)
+  return mood_log
+
+def create_xp_event(db : Session , xp_type: str , amount : int ):
+  xp_event = models.XPEvent(
+    xp_type = xp_type,
+    amount = amount,
+    timestamp = datetime.now()
+  )
+  
+  db.add(xp_event)
+  db.commit()
+  db.refresh(xp_event)
+  return xp_event
