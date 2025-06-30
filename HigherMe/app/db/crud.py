@@ -66,3 +66,17 @@ def get_or_create_level(db : Session):
     db.commit()
     db.refresh(level)
   return level
+
+
+def update_level(db : Session , new_xp : int):
+  level = get_or_create_level(db)
+  
+  level.total_xp += new_xp
+  
+   # level update: every 100 xp → +1 level
+  level.current_level = (level.total_xp // 100) + 1
+  level.last_updated = datetime.now()
+  
+  db.commit()
+  db.refresh(level)
+  return level
