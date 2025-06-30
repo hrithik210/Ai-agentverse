@@ -52,3 +52,17 @@ def create_xp_event(db : Session , xp_type: str , amount : int ):
   db.commit()
   db.refresh(xp_event)
   return xp_event
+
+def get_or_create_level(db : Session):
+  level = db.query(models.Level).first()
+  
+  if not level:
+    level = models.Level(
+      current_level= 1,
+      total_xp = 0,
+      last_updated = datetime.now()
+    )
+    db.add(level)
+    db.commit()
+    db.refresh(level)
+  return level
