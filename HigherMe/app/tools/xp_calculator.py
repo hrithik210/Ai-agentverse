@@ -15,3 +15,38 @@ def calculateXp(event_type : str , metrics : dict) -> dict :
     xp += minutes_spent // 10                          # 1 XP per 10 mins coding
     
     details = f"💻 Coding XP: +{xp} total ({(lines_added + lines_removed)} lines, {minutes_spent} mins)"
+  
+  elif event_type == "health":
+        sleep = metrics.get("sleep_hours", 0)
+        water = metrics.get("water_intake_liters", 0)
+        exercise = metrics.get("exercise_minutes", 0)
+        meals = metrics.get("meals", 0)
+
+        if sleep >= 7:
+            xp += 20
+            details += "🛌 +20 XP for good sleep. "
+        if water >= 2:
+            xp += 10
+            details += "💧 +10 XP for hydration. "
+        if exercise >= 30:
+            xp += 15
+            details += "🏃 +15 XP for exercise. "
+        if meals >= 3:
+            xp += 5
+            details += "🍽️ +5 XP for balanced meals. "
+            
+  elif event_type == "mood":
+        mood_score = metrics.get("sentiment_score", 0)
+        xp += int((mood_score + 1) * 5)  # sentiment score: -1 to 1 → 0–10 XP
+        details = f"🧠 Mood XP: {xp} based on sentiment."
+        
+  else:
+    details =  "unknown event type"
+    
+  return (
+    {
+      "xp_amount": xp,
+      "details": details.strip(),
+    
+    }
+  )
