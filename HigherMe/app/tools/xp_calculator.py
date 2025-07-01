@@ -21,7 +21,7 @@ def calculateXp(event_type : str , metrics : dict) -> dict :
         water = metrics.get("water_intake_liters", 0)
         exercise = metrics.get("exercise_minutes", 0)
         meal_score = metrics.get("meal_score", 0)
-        xp += int((meal_score + 1) * 5)
+  
 
         if sleep >= 7:
             xp += 20
@@ -32,10 +32,10 @@ def calculateXp(event_type : str , metrics : dict) -> dict :
         if exercise >= 30:
             xp += 15
             details += "🏃 +15 XP for exercise. "
-        if meals >= 3:
-            xp += 5
-            details += "🍽️ +5 XP for balanced meals. "
-            
+        if meal_score is not None:
+            xp += int((meal_score + 1) * 5)
+            details += f"🍽️ +{int((meal_score + 1) * 5)} XP for meals. "
+         
   elif event_type == "mood":
         mood_score = metrics.get("sentiment_score", 0)
         xp += int((mood_score + 1) * 5)  # sentiment score: -1 to 1 → 0–10 XP
