@@ -20,7 +20,8 @@ def calculateXp(event_type : str , metrics : dict) -> dict :
         sleep = metrics.get("sleep_hours", 0)
         water = metrics.get("water_intake_liters", 0)
         exercise = metrics.get("exercise_minutes", 0)
-        meals = metrics.get("meals", 0)
+        meal_score = metrics.get("meal_score", 0)
+        xp += int((meal_score + 1) * 5)
 
         if sleep >= 7:
             xp += 20
