@@ -40,4 +40,8 @@ def run_health_agent(meals: str, sleep_hours: float, water_liters: float, exerci
 
     xp_result = calculateXp(event_type="health", metrics=metrics)
     
-    crud.create_xp_event()
+    crud.create_xp_event(db = db , xp_type='health' , amount= xp_result['xp'])
+    level = crud.get_or_create_level(db=db)
+    crud.update_level(db=db, new_xp=xp_result["xp"])
+    
+    print(f"✅ HealthAgent XP Summary:\n{xp_result['details']}")
