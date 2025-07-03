@@ -18,7 +18,7 @@ def calculateXp(event_type : str , metrics : dict) -> dict :
   
   elif event_type == "health":
         sleep = metrics.get("sleep_hours", 0)
-        water = metrics.get("water_intake_liters", 0)
+        water = metrics.get("water_intake_liter", 0)
         exercise = metrics.get("exercise_minutes", 0)
         meal_score = metrics.get("meal_score", 0)
   
@@ -46,7 +46,7 @@ def calculateXp(event_type : str , metrics : dict) -> dict :
     
   return (
     {
-      "xp_amount": xp,
+      "xp": xp,
       "details": details.strip(),
     
     }

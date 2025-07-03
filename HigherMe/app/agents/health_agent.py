@@ -38,7 +38,7 @@ def run_health_agent(meals: str, sleep_hours: float, water_liters: float, exerci
         db=db,
         meals=meals,
         sleep_hours=sleep_hours,
-        water_intake_liters=water_liters,
+        water_intake_liter=water_liters,
         exercise_minutes=exercise_minutes
     )
 

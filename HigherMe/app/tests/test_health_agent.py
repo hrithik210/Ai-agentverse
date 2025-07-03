@@ -6,8 +6,8 @@ def test():
         run_health_agent(
             meals="breakfast: oats and banana, lunch: grilled chicken and salad, dinner: paneer wrap",
             sleep_hours=7.5,
-            water_liters=2.0,
             exercise_minutes=45,
+            water_liters=2.0,
             db=db
         )
 
