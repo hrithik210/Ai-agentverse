@@ -15,7 +15,7 @@ def create_code_log(db: Session , lines_Added : int , lines_Removed : int , tota
   db.refresh(code_log)
   return code_log
 
-def create_health_log(db: Session, meals: str, sleep_hours: float, exercise_minutes: float, water_intake_liter: float):
+def create_health_log(db: Session, meals: str, sleep_hours: int, exercise_minutes: float, water_intake_liter: float):
   health_log = models.HealthLog(
     meals = meals,
     sleep_hours = sleep_hours,

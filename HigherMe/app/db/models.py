@@ -18,7 +18,7 @@ class HealthLog(Base):
   id = Column(Integer, primary_key = True , index=True)
   meals = Column(String)
   sleep_hours = Column(Integer)
-  excercise_minutes = Column(Float)
+  excercise_minutes = Column(Integer)
   water_intake_liter = Column(Float)
   date = Column(DateTime, default=datetime.now)
   
