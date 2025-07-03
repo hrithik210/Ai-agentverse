@@ -3,14 +3,27 @@ from app.tools.xp_calculator import calculateXp
 from app.db.database import get_db
 from sqlalchemy.orm import Session
 from datetime import datetime
+from langchain_groq import ChatGroq
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+#initializing llm
+llm = ChatGroq(
+    model="llama-3.1-8b-instant",
+    temperature=0.0,
+    max_retries=2,
+    # other params...
+)
 
 def score_meal_sentiment(meal_text: str) -> float:
     prompt = f"""
-    Rate the nutritional healthiness of this meal on a scale from -1 (very unhealthy) to 1 (very healthy).
-    Only return the number. No text.
-    
-    Meals: "{meal_text}"
-    """
+      Rate the healthiness of this meal on a scale from -1 to 1. 
+      Only return a number, no explanation.
+
+      Meal: {meal_text}
+      """
     try:
         result = llm(prompt).strip()
         return float(result)
