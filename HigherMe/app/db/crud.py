@@ -1,82 +1,158 @@
-from sqlalchemy.orm import Session
-from . import models
+import psycopg2
 from datetime import datetime
+from app.db.database import get_db
 
-def create_code_log(db: Session , lines_Added : int , lines_Removed : int , total_Time_Minutes : float):
-  code_log = models.CodeLog(
-    lines_added = lines_Added,
-    lines_removed = lines_Removed,
-    total_time_minutes = total_Time_Minutes,
-    date = datetime.now()
-  )
-  
-  db.add(code_log)
-  db.commit()
-  db.refresh(code_log)
-  return code_log
+def create_code_log(lines_Added : int , lines_Removed : int , total_Time_Minutes : float):
+    conn = get_db()
+    if not conn:
+        return None
 
-def create_health_log(db: Session, meals: str, sleep_hours: int, exercise_minutes: float, water_intake_liter: float):
-  health_log = models.HealthLog(
-    meals = meals,
-    sleep_hours = sleep_hours,
-    excercise_minutes = exercise_minutes,
-    water_intake_liter = water_intake_liter,
-    date = datetime.now()
-  )
-  
-  db.add(health_log)
-  db.commit()
-  db.refresh(health_log)
-  return health_log
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO code_logs (lines_added, lines_removed, total_time_minutes, date)
+                VALUES (%s, %s, %s, %s)
+                RETURNING id;
+                """,
+                (lines_Added, lines_Removed, total_Time_Minutes, datetime.now())
+            )
+            code_log_id = cursor.fetchone()[0]
+            conn.commit()
+            return code_log_id
+    except Exception as e:
+        print(f"Error creating code log: {e}")
+        return None
+    finally:
+        conn.close()
 
-def create_mood_log(db: Session, mood_text: str, sentiment: str):
-  mood_log = models.MoodLog(
-    mood_text = mood_text,
-    sentiment = sentiment,
-    date = datetime.now()
-  )
-  
-  db.add(mood_log)
-  db.commit()
-  db.refresh(mood_log)
-  return mood_log
+def create_health_log(meals: str, sleep_hours: float, exercise_minutes: int, water_intake_liter: float):
+    conn = get_db()
+    if not conn:
+        return None
 
-def create_xp_event(db : Session , xp_type: str , amount : int ):
-  xp_event = models.XPEvent(
-    xp_type = xp_type,
-    amount = amount,
-    timestamp = datetime.now()
-  )
-  
-  db.add(xp_event)
-  db.commit()
-  db.refresh(xp_event)
-  return xp_event
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO health_logs (meals, sleep_hours, exercise_minutes, water_intake_liter, date)
+                VALUES (%s, %s, %s, %s, %s)
+                RETURNING id;
+                """,
+                (meals, sleep_hours, exercise_minutes, water_intake_liter, datetime.now())
+            )
+            health_log_id = cursor.fetchone()[0]
+            conn.commit()
+            return health_log_id
+    except Exception as e:
+        print(f"Error creating health log: {e}")
+        return None
+    finally:
+        conn.close()
 
-def get_or_create_level(db : Session):
-  level = db.query(models.Level).first()
-  
-  if not level:
-    level = models.Level(
-      current_level= 1,
-      total_xp = 0,
-      last_updated = datetime.now()
-    )
-    db.add(level)
-    db.commit()
-    db.refresh(level)
-  return level
+def create_mood_log(mood_text: str, sentiment: str):
+    conn = get_db()
+    if not conn:
+        return None
 
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO mood_logs (mood_text, sentiment, date)
+                VALUES (%s, %s, %s)
+                RETURNING id;
+                """,
+                (mood_text, sentiment, datetime.now())
+            )
+            mood_log_id = cursor.fetchone()[0]
+            conn.commit()
+            return mood_log_id
+    except Exception as e:
+        print(f"Error creating mood log: {e}")
+        return None
+    finally:
+        conn.close()
 
-def update_level(db : Session , new_xp : int):
-  level = get_or_create_level(db)
-  
-  level.total_xp += new_xp
-  
-   # level update: every 100 xp → +1 level
-  level.current_level = (level.total_xp // 100) + 1
-  level.last_updated = datetime.now()
-  
-  db.commit()
-  db.refresh(level)
-  return level
+def create_xp_event(xp_type: str, amount: int):
+    conn = get_db()
+    if not conn:
+        return None
+
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO xp_events (xp_type, amount, timestamp)
+                VALUES (%s, %s, %s)
+                RETURNING id;
+                """,
+                (xp_type, amount, datetime.now())
+            )
+            xp_event_id = cursor.fetchone()[0]
+            conn.commit()
+            return xp_event_id
+    except Exception as e:
+        print(f"Error creating XP event: {e}")
+        return None
+    finally:
+        conn.close()
+
+def get_or_create_level():
+    conn = get_db()
+    if not conn:
+        return None
+
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM levels LIMIT 1;")
+            level = cursor.fetchone()
+
+            if not level:
+                cursor.execute(
+                    """
+                    INSERT INTO levels (current_level, total_xp, last_updated)
+                    VALUES (%s, %s, %s)
+                    RETURNING id;
+                    """,
+                    (1, 0, datetime.now())
+                )
+                conn.commit()
+                level_id = cursor.fetchone()[0]
+                return level_id
+            return level
+    except Exception as e:
+        print(f"Error fetching or creating level: {e}")
+        return None
+    finally:
+        conn.close()
+
+def update_level(new_xp: int):
+    conn = get_db()
+    if not conn:
+        return None
+
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM levels LIMIT 1;")
+            level = cursor.fetchone()
+
+            if level:
+                total_xp = level[2] + new_xp
+                current_level = (total_xp // 100) + 1
+
+                cursor.execute(
+                    """
+                    UPDATE levels
+                    SET total_xp = %s, current_level = %s, last_updated = %s
+                    WHERE id = %s;
+                    """,
+                    (total_xp, current_level, datetime.now(), level[0])
+                )
+                conn.commit()
+                return level[0]
+    except Exception as e:
+        print(f"Error updating level: {e}")
+        return None
+    finally:
+        conn.close()

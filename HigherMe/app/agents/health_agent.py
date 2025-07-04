@@ -1,7 +1,5 @@
 from app.db import crud
 from app.tools.xp_calculator import calculateXp
-from app.db.database import get_db
-from sqlalchemy.orm import Session
 from datetime import datetime
 from langchain_groq import ChatGroq
 import os
@@ -30,12 +28,11 @@ def score_meal_sentiment(meal_text: str) -> float:
     except Exception:
         return 0.0 
       
-def run_health_agent(meals: str, sleep_hours: float, water_liters: float, exercise_minutes: float, db: Session):
+def run_health_agent(meals: str, sleep_hours: float, water_liters: float, exercise_minutes: int):
     meal_score = score_meal_sentiment(meals)
 
     # Store health data
     crud.create_health_log(
-        db=db,
         meals=meals,
         sleep_hours=sleep_hours,
         water_intake_liter=water_liters,
@@ -53,8 +50,8 @@ def run_health_agent(meals: str, sleep_hours: float, water_liters: float, exerci
 
     xp_result = calculateXp(event_type="health", metrics=metrics)
     
-    crud.create_xp_event(db = db , xp_type='health' , amount= xp_result['xp'])
-    level = crud.get_or_create_level(db=db)
-    crud.update_level(db=db, new_xp=xp_result["xp"])
+    crud.create_xp_event(xp_type='health', amount=xp_result['xp'])
+    level = crud.get_or_create_level()
+    crud.update_level(new_xp=xp_result["xp"])
     
     print(f"✅ HealthAgent XP Summary:\n{xp_result['details']}")
