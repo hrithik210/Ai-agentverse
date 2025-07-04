@@ -17,8 +17,10 @@ def calculateXp(event_type : str , metrics : dict) -> dict :
     details = f"💻 Coding XP: +{xp} total ({(lines_added + lines_removed)} lines, {minutes_spent} mins)"
   
   elif event_type == "health":
+        print("Calculating health XP...")
+        print(f"Metrics received: {metrics}")
         sleep = metrics.get("sleep_hours", 0)
-        water = metrics.get("water_intake_liter", 0)
+        water = metrics.get("water_intake_liters", 0)
         exercise = metrics.get("exercise_minutes", 0)
         meal_score = metrics.get("meal_score", 0)
   

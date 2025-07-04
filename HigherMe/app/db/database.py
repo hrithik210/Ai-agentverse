@@ -35,6 +35,14 @@ def create_tables():
         with conn.cursor() as cursor:
             cursor.execute(
                 """
+            CREATE TABLE IF NOT EXISTS code_logs (
+                id SERIAL PRIMARY KEY,
+                lines_added INT,
+                lines_removed INT,
+                total_time_minutes FLOAT,
+                date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+
             CREATE TABLE IF NOT EXISTS health_logs (
                 id SERIAL PRIMARY KEY,
                 meals TEXT,
