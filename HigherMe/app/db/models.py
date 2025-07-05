@@ -26,8 +26,8 @@ class MoodLog(Base):
     __tablename__ = "mood_logs"
     id = Column(Integer, primary_key=True, index=True)
     mood_text = Column(String)
-    sentiment = Column(String)
-    date = Column(DateTime, default=datetime.now)
+    sentiment = Column(Float)
+    timestamp = Column(DateTime, default=datetime.utcnow)
     
 class XPEvent(Base):
     __tablename__ = "xp_events"

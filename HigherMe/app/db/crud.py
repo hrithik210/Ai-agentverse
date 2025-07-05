@@ -59,7 +59,7 @@ def create_mood_log(mood_text: str, sentiment: str):
         with conn.cursor() as cursor:
             cursor.execute(
                 """
-                INSERT INTO mood_logs (mood_text, sentiment, date)
+                INSERT INTO mood_logs (mood_text, sentiment, timestamp)
                 VALUES (%s, %s, %s)
                 RETURNING id;
                 """,
