@@ -42,3 +42,23 @@ rate my emotional performance on a scale from 0 to 10.
 Return ONLY the number. No explanation.
 """
     return prompt
+  
+  
+def run_mood_xp_llm_runner(db: Session):
+    mood_logs = get_today_mood_logs(db)
+    prompt = build_prompt(mood_logs)
+
+    try:
+        raw_response = llm.invoke(prompt).strip()
+        xp = int(float(raw_response))  # safely cast to int
+    except Exception as e:
+        print(f"⚠️ Failed to get LLM XP: {e}")
+        xp = 0
+
+    # Store XP
+    crud.create_xp_event(db, xp_type="mood", amount=xp)
+    crud.update_level(db, new_xp=xp)
+
+    print(f"🧠 LLM-Based Mood XP: +{xp} XP awarded for today.")
+
+    return xp
