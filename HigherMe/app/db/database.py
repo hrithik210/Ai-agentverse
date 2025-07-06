@@ -1,10 +1,29 @@
 import psycopg2
 import os
 from dotenv import load_dotenv
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
 load_dotenv()
 
 DATABASE_URL = os.getenv("DB_URL", "")
+
+# SQLAlchemy setup
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
+
+def get_db_session():
+    """Get SQLAlchemy session for ORM operations"""
+    db = SessionLocal()
+    try:
+        return db
+    except Exception as e:
+        print(f"SQLAlchemy session failed: {e}")
+        db.close()
+        return None
 
 
 def get_db():
@@ -55,8 +74,8 @@ def create_tables():
             CREATE TABLE IF NOT EXISTS mood_logs (
                 id SERIAL PRIMARY KEY,
                 mood_text TEXT,
-                sentiment TEXT,
-                date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                sentiment FLOAT,
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
 
             CREATE TABLE IF NOT EXISTS xp_events (
@@ -82,5 +101,16 @@ def create_tables():
         conn.close()
 
 
+def create_sqlalchemy_tables():
+    """Create tables using SQLAlchemy ORM"""
+    try:
+        Base.metadata.create_all(bind=engine)
+        print("SQLAlchemy tables created successfully!")
+    except Exception as e:
+        print(f"Error creating SQLAlchemy tables: {e}")
+
+
 if __name__ == "__main__":
     create_tables()
+    create_sqlalchemy_tables()
+    create_sqlalchemy_tables()

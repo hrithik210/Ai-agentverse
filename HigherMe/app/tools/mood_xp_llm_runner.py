@@ -3,7 +3,6 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 from app.db import crud
 from app.db.models import MoodLog
-from langchain.llms import Groq
 from dotenv import load_dotenv
 import os
 from langchain_groq import ChatGroq
@@ -49,15 +48,15 @@ def run_mood_xp_llm_runner(db: Session):
     prompt = build_prompt(mood_logs)
 
     try:
-        raw_response = llm.invoke(prompt).strip()
+        raw_response = llm.invoke(prompt).content.strip()
         xp = int(float(raw_response))  # safely cast to int
     except Exception as e:
         print(f"⚠️ Failed to get LLM XP: {e}")
         xp = 0
 
     # Store XP
-    crud.create_xp_event(db, xp_type="mood", amount=xp)
-    crud.update_level(db, new_xp=xp)
+    crud.create_xp_event(xp_type="mood", amount=xp)
+    crud.update_level(new_xp=xp)
 
     print(f"🧠 LLM-Based Mood XP: +{xp} XP awarded for today.")
 
