@@ -33,3 +33,16 @@ def analyze_mood_sentiment(text: str) -> float:
   except Exception as e:
     print(f"Error analyzing mood sentiment: {e}")
     return 0.0
+  
+
+def run_mood_agent(mood_text: str, db: Session):
+    sentiment_score = analyze_mood_sentiment(mood_text)
+
+    # Log mood entry — no XP here
+    crud.create_mood_log(
+        db=db,
+        mood_text=mood_text,
+        sentiment=sentiment_score
+    )
+
+    print(f"✅ Mood logged with sentiment score: {sentiment_score}")
