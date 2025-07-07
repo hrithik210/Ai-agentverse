@@ -18,7 +18,7 @@ llm = ChatGroq(
 )
 
 def get_today_mood_logs(db: Session):
-    today = datetime.utcnow().date()
+    today = datetime.now().date()
     return db.query(MoodLog).filter(MoodLog.timestamp >= today).order_by(MoodLog.timestamp).all()
   
 
