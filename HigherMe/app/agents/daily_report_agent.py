@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
-from app.db.models import XPEvent, MoodLog, HealthLog, CodeLog, UserLevel
-from langchain.llms import Groq
+from app.db.models import XPEvent, MoodLog, HealthLog, CodeLog, Level
 import os
 from langchain_groq import ChatGroq
 from dotenv import load_dotenv
@@ -30,16 +29,16 @@ def get_today_logs(db: Session):
     ).all()
 
     health_logs = db.query(HealthLog).filter(
-        HealthLog.timestamp >= today,
-        HealthLog.timestamp < tomorrow
+        HealthLog.date >= today,
+        HealthLog.date < tomorrow
     ).all()
 
     code_logs = db.query(CodeLog).filter(
-        CodeLog.timestamp >= today,
-        CodeLog.timestamp < tomorrow
+        CodeLog.date >= today,
+        CodeLog.date < tomorrow
     ).all()
 
-    level_info = db.query(UserLevel).first()
+    level_info = db.query(Level).first()
 
     return {
         "xp_events": xp_events,
@@ -84,7 +83,7 @@ Give a short emotional summary of the day. Be supportive and slightly poetic.
 """
 
     try:
-        return llm.invoke(prompt).strip()
+        return llm.invoke(prompt).content.strip()
     except Exception as e:
         return f"❌ Failed to generate mood summary: {e}"
 
@@ -96,7 +95,7 @@ def build_daily_report(db: Session):
     mood_section = build_mood_summary(logs["mood_logs"])
 
     level_info = logs["level"]
-    level_line = f"\n🧬 Current Level: {level_info.level} | Total XP: {level_info.total_xp}"
+    level_line = f"\n🧬 Current Level: {level_info.current_level} | Total XP: {level_info.total_xp}"
 
     report = "\n".join([
         "🌅 **Daily Report**",
