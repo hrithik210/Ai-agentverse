@@ -48,3 +48,17 @@ def get_today_logs(db: Session):
         "code_logs": code_logs,
         "level": level_info
     }
+    
+def format_xp_breakdown(xp_events):
+    summary = {}
+    total = 0
+
+    for xp in xp_events:
+        summary[xp.xp_type] = summary.get(xp.xp_type, 0) + xp.amount
+        total += xp.amount
+
+    lines = [f"🔢 **XP Breakdown:**"]
+    for key, value in summary.items():
+        lines.append(f"- {key.capitalize()}: +{value} XP")
+    lines.append(f"\n🏆 **Total XP Today:** +{total}")
+    return "\n".join(lines)
