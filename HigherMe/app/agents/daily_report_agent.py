@@ -87,3 +87,24 @@ Give a short emotional summary of the day. Be supportive and slightly poetic.
         return llm.invoke(prompt).strip()
     except Exception as e:
         return f"❌ Failed to generate mood summary: {e}"
+
+
+
+def build_daily_report(db: Session):
+    logs = get_today_logs(db)
+    xp_section = format_xp_breakdown(logs["xp_events"])
+    mood_section = build_mood_summary(logs["mood_logs"])
+
+    level_info = logs["level"]
+    level_line = f"\n🧬 Current Level: {level_info.level} | Total XP: {level_info.total_xp}"
+
+    report = "\n".join([
+        "🌅 **Daily Report**",
+        "-" * 30,
+        xp_section,
+        "",
+        mood_section,
+        level_line
+    ])
+
+    return report
