@@ -62,3 +62,28 @@ def format_xp_breakdown(xp_events):
         lines.append(f"- {key.capitalize()}: +{value} XP")
     lines.append(f"\n🏆 **Total XP Today:** +{total}")
     return "\n".join(lines)
+
+
+def build_mood_summary(mood_logs):
+    if not mood_logs:
+        return "🧠 No mood logs today."
+
+    combined = "\n".join([
+        f"[{mood.timestamp.strftime('%H:%M')}] {mood.mood_text}"
+        for mood in mood_logs
+    ])
+
+    prompt = f"""
+You are an AI narrator summarizing emotional growth.
+
+Here are the mood reflections from today:
+
+{combined}
+
+Give a short emotional summary of the day. Be supportive and slightly poetic.
+"""
+
+    try:
+        return llm.invoke(prompt).strip()
+    except Exception as e:
+        return f"❌ Failed to generate mood summary: {e}"
