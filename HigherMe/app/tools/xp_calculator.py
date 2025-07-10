@@ -17,9 +17,15 @@ def calculateXp(event_type: str, metrics: dict) -> dict:
     Returns a dict with XP amount and breakdown details.
     """
     
-    # Handle mood logs specifically (like mood_xp_llm_runner)
+    # Handle specific event types with dedicated calculators
     if event_type == "mood" and "mood_logs" in metrics:
         return _calculate_mood_performance_xp(metrics["mood_logs"])
+        
+    if event_type == "health":
+        return _calculate_health_xp(metrics)
+        
+    if event_type == "coding":
+        return _calculate_coding_xp(metrics)
     
     prompt = f"""You are a gamification expert calculating experience points (XP) for personal growth activities.
 
@@ -35,9 +41,10 @@ For CODING:
 
 For HEALTH:
 - Sleep quality and duration (7-9 hours optimal)
-- Water intake (2+ liters good)
+- Water intake (2+ liters good) 
 - Exercise duration and intensity
 - Meal quality and nutrition
+- IMPORTANT: Evaluate overall health with MAX of 30 XP for excellent health habits
 
 For MOOD:
 - Emotional awareness and reflection
@@ -76,26 +83,43 @@ Example: {{"xp": 45, "details": "💻 Solid coding session! +45 XP for 2 hours o
         # Fallback to simple calculation
         return _fallback_xp_calculation(event_type, metrics)
 
+def _calculate_health_xp(metrics: dict) -> dict:
+    """Calculates XP for health metrics in a consistent way"""
+    sleep = metrics.get("sleep_hours", 0)
+    water = metrics.get("water_intake_liters", 0)
+    exercise = metrics.get("exercise_minutes", 0)
+    meal_score = metrics.get("meal_score", 0)
+    
+    # Calculate health score on scale of 0-10
+    health_score = 0
+    if sleep >= 7: health_score += 2.5
+    if water >= 2: health_score += 2.5
+    if exercise >= 30: health_score += 2.5
+    health_score += (meal_score + 1) * 1.25  # Convert -1 to 1 scale to 0 to 2.5 scale
+    
+    # Cap at maximum of 10 and convert to 0-30 XP range
+    health_score = min(10, health_score)
+    xp = int(health_score * 3)
+    
+    return {
+        "xp": xp,
+        "details": f"🏋️ Health XP: +{xp} (Overall health score: {health_score:.1f}/10)"
+    }
+
 def _fallback_xp_calculation(event_type: str, metrics: dict) -> dict:
     """Fallback XP calculation if LLM fails"""
     xp = 0
     details = ""
     
     if event_type == 'coding':
-        lines = metrics.get('lines_added', 0) + metrics.get('lines_removed', 0)
-        minutes = metrics.get('total_time_minutes', 0)
-        xp = min(50, (lines // 10) + (minutes // 10))
-        details = f"� Coding XP: +{xp} (fallback calculation)"
+        result = _calculate_coding_xp(metrics)
+        xp = result["xp"]
+        details = result["details"]
     
     elif event_type == "health":
-        sleep = metrics.get("sleep_hours", 0)
-        water = metrics.get("water_intake_liters", 0)
-        exercise = metrics.get("exercise_minutes", 0)
-        
-        if sleep >= 7: xp += 20
-        if water >= 2: xp += 10
-        if exercise >= 30: xp += 15
-        details = f"� Health XP: +{xp} (fallback calculation)"
+        result = _calculate_health_xp(metrics)
+        xp = result["xp"]
+        details = result["details"]
          
     elif event_type == "mood":
         sentiment = metrics.get("sentiment_score", 0)
@@ -176,3 +200,30 @@ def calculate_mood_performance_xp(mood_logs, db_session=None):
     print(f"Details: {details}")
     
     return xp
+
+def _calculate_coding_xp(metrics: dict) -> dict:
+    """Calculates XP for coding metrics in a consistent way"""
+    lines_added = metrics.get('lines_added', 0)
+    lines_removed = metrics.get('lines_removed', 0)
+    total_lines = lines_added + lines_removed
+    minutes = metrics.get('total_time_minutes', 0)
+    
+    # Base XP calculation
+    lines_xp = total_lines // 10  # 10 lines = 1 XP
+    time_xp = minutes // 10       # 10 minutes = 1 XP
+    
+    # Calculate coding score with some weight adjustments
+    # Focus more on time spent coding than just raw line count
+    coding_xp = min(50, int(time_xp * 0.7 + lines_xp * 0.3))
+    
+    # Add bonus for significant coding sessions
+    if minutes >= 120:  # 2+ hours coding
+        coding_xp += 5
+        details = f"💻 Coding XP: +{coding_xp} (Great coding session with {total_lines} lines over {minutes} minutes!)"
+    else:
+        details = f"💻 Coding XP: +{coding_xp} ({total_lines} lines over {minutes} minutes)"
+    
+    return {
+        "xp": coding_xp,
+        "details": details
+    }
