@@ -35,6 +35,7 @@ class XPEvent(Base):
     xp_type = Column(String)
     amount = Column(Integer)
     timestamp = Column(DateTime, default=datetime.now)
+    details = Column(String, nullable=True)
     
 
 class Level(Base):
