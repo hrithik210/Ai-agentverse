@@ -1,7 +1,9 @@
 
 from app.db.database import get_db, get_db_session
 from app.agents.mood_agent import run_mood_agent
-from app.tools.mood_xp_llm_runner import run_mood_xp_llm_runner
+from app.tools.xp_calculator import calculate_mood_performance_xp
+from app.db.models import MoodLog
+from datetime import datetime
 
 def seed_mood_logs(db):
     print("🌤️ Logging today's moods...")
@@ -20,9 +22,11 @@ def test():
             # STEP 1: Log multiple moods (uses raw connection)
             seed_mood_logs(db_conn)
 
-            # STEP 2: Run the LLM XP Runner (uses SQLAlchemy session)
-            print("\n📈 Running Mood XP Runner...")
-            xp = run_mood_xp_llm_runner(db_session)
+            # STEP 2: Get today's mood logs and calculate XP using new calculator
+            print("\n📈 Running Mood XP Calculator...")
+            today = datetime.now().date()
+            mood_logs = db_session.query(MoodLog).filter(MoodLog.timestamp >= today).order_by(MoodLog.timestamp).all()
+            xp = calculate_mood_performance_xp(mood_logs, db_session)
 
             # STEP 3: Show result
             print(f"\n✅ Test complete. Mood XP awarded: {xp}")

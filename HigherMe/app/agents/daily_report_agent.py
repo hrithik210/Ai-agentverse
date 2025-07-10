@@ -15,7 +15,7 @@ llm = ChatGroq(
 )
 
 def get_today_logs(db: Session):
-    today = datetime.utcnow().date()
+    today = datetime.now().date()
     tomorrow = today + timedelta(days=1)
 
     xp_events = db.query(XPEvent).filter(
