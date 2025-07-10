@@ -122,9 +122,16 @@ def _fallback_xp_calculation(event_type: str, metrics: dict) -> dict:
         details = result["details"]
          
     elif event_type == "mood":
-        sentiment = metrics.get("sentiment_score", 0)
-        xp = int((sentiment + 1) * 10)  # -1 to 1 → 0 to 20 XP
-        details = f"🧠 Mood XP: +{xp} (fallback calculation)"
+        # If we have mood_logs, use the proper calculator
+        if "mood_logs" in metrics:
+            result = _calculate_mood_performance_xp(metrics["mood_logs"])
+            xp = result["xp"]
+            details = result["details"]
+        # Otherwise fallback to sentiment score only
+        else:
+            sentiment = metrics.get("sentiment_score", 0)
+            xp = int((sentiment + 1) * 15)  # -1 to 1 → 0 to 30 XP
+            details = f"🧠 Mood XP: +{xp} (based on sentiment score)"
     
     return {"xp": xp, "details": details}
 
@@ -146,7 +153,7 @@ Here are the mood logs for the day:\n"""
 
     prompt += """
 Based on emotional awareness, resilience, and progress today,
-rate the overall emotional performance on a scale from 0 to 10.
+rate the overall emotional performance on a scale from 0 to 30.
 
 Consider:
 - Self-reflection and awareness
@@ -157,7 +164,7 @@ Consider:
 Respond with ONLY this JSON format:
 {"xp": <number>, "details": "<brief motivational explanation>"}
 
-Example: {"xp": 8, "details": "🧠 Strong emotional awareness! Great self-reflection and positive growth."}
+Example: {"xp": 20, "details": "🧠 Strong emotional awareness! Great self-reflection and positive growth."}
 """
 
     try:
@@ -165,7 +172,7 @@ Example: {"xp": 8, "details": "🧠 Strong emotional awareness! Great self-refle
         import json
         result = json.loads(response.content.strip())
         
-        xp = max(0, min(10, int(result.get("xp", 0))))  # 0-10 scale like original
+        xp = max(0, min(30, int(result.get("xp", 0))))  # 0-30 scale for consistency with health
         details = result.get("details", f"🧠 Emotional performance XP: +{xp}")
         
         return {"xp": xp, "details": details}
@@ -175,31 +182,10 @@ Example: {"xp": 8, "details": "🧠 Strong emotional awareness! Great self-refle
         # Fallback: average sentiment-based calculation
         if mood_logs:
             avg_sentiment = sum(log.sentiment for log in mood_logs) / len(mood_logs)
-            xp = int((avg_sentiment + 1) * 5)  # -1 to 1 → 0 to 10
+            xp = int((avg_sentiment + 1) * 15)  # -1 to 1 → 0 to 30
         else:
             xp = 0
         return {"xp": xp, "details": f"🧠 Mood XP: +{xp} (fallback calculation)"}
-
-def calculate_mood_performance_xp(mood_logs, db_session=None):
-    """
-    Direct replacement for mood_xp_llm_runner.
-    Takes mood logs and returns XP, optionally stores to database.
-    """
-    from app.db import crud
-    
-    result = _calculate_mood_performance_xp(mood_logs)
-    xp = result["xp"]
-    details = result["details"]
-    
-    # Store XP (like original mood_xp_llm_runner)
-    if db_session:
-        crud.create_xp_event(xp_type="mood", amount=xp)
-        crud.update_level(new_xp=xp)
-    
-    print(f"🧠 LLM-Based Mood XP: +{xp} XP awarded for today.")
-    print(f"Details: {details}")
-    
-    return xp
 
 def _calculate_coding_xp(metrics: dict) -> dict:
     """Calculates XP for coding metrics in a consistent way"""

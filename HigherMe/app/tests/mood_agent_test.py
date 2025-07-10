@@ -1,7 +1,8 @@
 
 from app.db.database import get_db, get_db_session
 from app.agents.mood_agent import run_mood_agent
-from app.tools.xp_calculator import calculate_mood_performance_xp
+from app.tools.xp_calculator import calculateXp
+from app.db import crud
 from app.db.models import MoodLog
 from datetime import datetime
 
@@ -22,14 +23,22 @@ def test():
             # STEP 1: Log multiple moods (uses raw connection)
             seed_mood_logs(db_conn)
 
-            # STEP 2: Get today's mood logs and calculate XP using new calculator
+            # STEP 2: Get today's mood logs and calculate XP using main calculator
             print("\n📈 Running Mood XP Calculator...")
             today = datetime.now().date()
             mood_logs = db_session.query(MoodLog).filter(MoodLog.timestamp >= today).order_by(MoodLog.timestamp).all()
-            xp = calculate_mood_performance_xp(mood_logs, db_session)
+            
+            # Calculate XP using the unified calculator
+            result = calculateXp(event_type="mood", metrics={"mood_logs": mood_logs})
+            xp = result["xp"]
+            
+            # Store XP in database
+            crud.create_xp_event(xp_type="mood", amount=xp)
+            crud.update_level(new_xp=xp)
 
             # STEP 3: Show result
             print(f"\n✅ Test complete. Mood XP awarded: {xp}")
+            print(f"Details: {result['details']}")
         finally:
             db_conn.close()
             db_session.close()
