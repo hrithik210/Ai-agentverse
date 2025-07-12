@@ -26,5 +26,6 @@ def run_all_daily_tasks():
         
 
 def start():
-    scheduler.add_job(run_all_daily_tasks, 'cron', hour=23, minute=59)
+    # scheduler.add_job(run_all_daily_tasks, 'cron', hour=23, minute=59)
+    scheduler.add_job(run_all_daily_tasks, 'interval', seconds=10)
     scheduler.start()
