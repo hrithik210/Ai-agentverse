@@ -1,78 +1,88 @@
 import psycopg2
 from datetime import datetime
 from app.db.database import get_db
+from sqlalchemy.orm import Session
+from app.db.models import CodeLog, HealthLog, MoodLog, XPEvent, Level
 
-def create_code_log(lines_Added : int , lines_Removed : int , total_Time_Minutes : float):
-    conn = get_db()
-    if not conn:
-        return None
-
+def create_code_log(db: Session, *, lines_added: int, lines_removed: int, total_time_minutes: float):
     try:
-        with conn.cursor() as cursor:
-            cursor.execute(
-                """
-                INSERT INTO code_logs (lines_added, lines_removed, total_time_minutes, date)
-                VALUES (%s, %s, %s, %s)
-                RETURNING id;
-                """,
-                (lines_Added, lines_Removed, total_Time_Minutes, datetime.now())
-            )
-            code_log_id = cursor.fetchone()[0]
-            conn.commit()
-            return code_log_id
+        code_log = CodeLog(
+            lines_added=lines_added,
+            lines_removed=lines_removed,
+            total_time_minutes=total_time_minutes,
+            date=datetime.now(),
+            processed=False
+        )
+        db.add(code_log)
+        db.commit()
+        db.refresh(code_log)
+        return code_log
     except Exception as e:
+        db.rollback()
         print(f"Error creating code log: {e}")
         return None
-    finally:
-        conn.close()
 
-def create_health_log(meals: str, sleep_hours: float, exercise_minutes: int, water_intake_liter: float):
-    conn = get_db()
-    if not conn:
-        return None
-
+def create_health_log(db: Session, *, meals: str, sleep_hours: float, exercise_minutes: int, water_intake_liter: float):
     try:
-        with conn.cursor() as cursor:
-            cursor.execute(
-                """
-                INSERT INTO health_logs (meals, sleep_hours, exercise_minutes, water_intake_liter, date)
-                VALUES (%s, %s, %s, %s, %s)
-                RETURNING id;
-                """,
-                (meals, sleep_hours, exercise_minutes, water_intake_liter, datetime.now())
-            )
-            health_log_id = cursor.fetchone()[0]
-            conn.commit()
-            return health_log_id
+        health_log = HealthLog(
+            meals=meals,
+            sleep_hours=sleep_hours,
+            exercise_minutes=exercise_minutes,
+            water_intake_liter=water_intake_liter,
+            date=datetime.now(),
+            processed=False
+        )
+        db.add(health_log)
+        db.commit()
+        db.refresh(health_log)
+        return health_log
     except Exception as e:
+        db.rollback()
         print(f"Error creating health log: {e}")
         return None
-    finally:
-        conn.close()
 
-def create_mood_log(mood_text: str, sentiment: str):
-    conn = get_db()
-    if not conn:
-        return None
-
+def create_mood_log(db: Session, *, mood_text: str, sentiment: float):
     try:
-        with conn.cursor() as cursor:
-            cursor.execute(
-                """
-                INSERT INTO mood_logs (mood_text, sentiment, timestamp)
-                VALUES (%s, %s, %s)
-                RETURNING id;
-                """,
-                (mood_text, sentiment, datetime.now())
-            )
-            mood_log_id = cursor.fetchone()[0]
-            conn.commit()
-            return mood_log_id
+        mood_log = MoodLog(
+            mood_text=mood_text,
+            sentiment=sentiment,
+            timestamp=datetime.now(),
+            processed=False
+        )
+        db.add(mood_log)
+        db.commit()
+        db.refresh(mood_log)
+        return mood_log
     except Exception as e:
+        db.rollback()
         print(f"Error creating mood log: {e}")
         return None
-    finally:
-        conn.close()
+
+def mark_logs_as_processed(db: Session, log_ids: list, log_type: str):
+    """Mark multiple logs as processed"""
+    try:
+        now = datetime.now()
+        if log_type == "mood":
+            db.query(MoodLog).filter(MoodLog.id.in_(log_ids)).update({
+                "processed": True,
+                "processed_at": now
+            })
+        elif log_type == "health":
+            db.query(HealthLog).filter(HealthLog.id.in_(log_ids)).update({
+                "processed": True,
+                "processed_at": now
+            })
+        elif log_type == "code":
+            db.query(CodeLog).filter(CodeLog.id.in_(log_ids)).update({
+                "processed": True,
+                "processed_at": now
+            })
+        db.commit()
+        return True
+    except Exception as e:
+        db.rollback()
+        print(f"Error marking logs as processed: {e}")
+        return False
 
 def create_xp_event(xp_type: str, amount: int):
     conn = get_db()

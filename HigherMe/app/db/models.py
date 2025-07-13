@@ -1,4 +1,4 @@
-from sqlalchemy import Column , Integer , String, DateTime, ForeignKey, Float
+from sqlalchemy import Column , Integer , String, DateTime, ForeignKey, Float, Boolean
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from .database import Base
@@ -10,6 +10,8 @@ class CodeLog(Base):
   lines_removed = Column(Integer)
   total_time_minutes = Column(Float)
   date = Column(DateTime, default=datetime.now)
+  processed = Column(Boolean, default=False)
+  processed_at = Column(DateTime, nullable=True)
   
 
 
@@ -21,6 +23,8 @@ class HealthLog(Base):
   exercise_minutes = Column(Integer)
   water_intake_liter = Column(Float)
   date = Column(DateTime, default=datetime.now)
+  processed = Column(Boolean, default=False)
+  processed_at = Column(DateTime, nullable=True)
   
 class MoodLog(Base):
     __tablename__ = "mood_logs"
@@ -28,6 +32,8 @@ class MoodLog(Base):
     mood_text = Column(String)
     sentiment = Column(Float)
     timestamp = Column(DateTime, default=datetime.utcnow)
+    processed = Column(Boolean, default=False)
+    processed_at = Column(DateTime, nullable=True)
     
 class XPEvent(Base):
     __tablename__ = "xp_events"
@@ -44,4 +50,3 @@ class Level(Base):
     current_level = Column(Integer, default=1)
     total_xp = Column(Integer, default=0)
     last_updated = Column(DateTime, default=datetime.now)
-    

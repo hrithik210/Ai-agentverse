@@ -5,6 +5,8 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from app.db import crud
 from app.tools.xp_calculator import calculateXp
+from app.db.database import get_db_session
+from app.db.models import CodeLog, XPEvent
 
 load_dotenv()
 
@@ -36,22 +38,15 @@ def get_git_stats():
         lines_added = 0
         lines_removed = 0
         
-        # Debug: print raw output
-        print(f"🔍 Git output for {today}:")
-        print(f"Raw output: '{result.stdout}'")
-        
         # Parse the numstat output
         for line in result.stdout.strip().split('\n'):
             if line.strip():
                 parts = line.split('\t')
-                print(f"   Parsing line: {parts}")
                 if len(parts) >= 2:
                     # Handle cases where files are binary or renamed (shown as '-')
                     if parts[0].isdigit() and parts[1].isdigit():
                         lines_added += int(parts[0])
                         lines_removed += int(parts[1])
-        
-        print(f"   Found: +{lines_added} -{lines_removed}")
         
         return {
             "lines_added": lines_added,
@@ -80,16 +75,12 @@ def get_recent_commit_stats():
         lines_added = 0
         lines_removed = 0
         
-        print(f"🔍 Checking recent commits:")
-        
         for line in result.stdout.strip().split('\n'):
             if line.strip():
                 parts = line.split('\t')
                 if len(parts) >= 2 and parts[0].isdigit() and parts[1].isdigit():
                     lines_added += int(parts[0])
                     lines_removed += int(parts[1])
-        
-        print(f"   Recent commits: +{lines_added} -{lines_removed}")
         
         return {
             "lines_added": lines_added,
@@ -100,90 +91,99 @@ def get_recent_commit_stats():
         print(f"⚠️ Error getting recent commit stats: {e}")
         return {"lines_added": 0, "lines_removed": 0}
 
-def get_coding_summaries():
-    """Fetch coding summaries from WakaTime API (free tier)"""
-    headers = {
-        "Authorization": f"Basic {WAKATIME_API_KEY}"
-    }
-
+def log_code_activity():
+    """
+    Log code activity without calculating XP.
+    XP will be calculated by the scheduler at the end of the day.
+    """
+    db_session = get_db_session()
     try:
-        # Get today's coding summary
-        today = datetime.now().strftime('%Y-%m-%d')
-        params = {
-            "start": today,
-            "end": today
-        }
+        # Get git stats
+        git_stats = get_git_stats()
         
-        response = httpx.get(SUMMARIES_API_URL, params=params, headers=headers)
-        response.raise_for_status()
-        data = response.json()
-
-        if not data["data"]:
-            return {
-                "total_minutes": 0,
-                "top_languages": [],
-                "is_up_to_date": True,
-                "range": "today"
-            }
-
-        summary = data["data"][0]
+        # Calculate total time from WakaTime if available
+        total_time_minutes = 0
+        if WAKATIME_API_KEY:
+            # Add WakaTime integration here if needed
+            pass
         
-        # Extract total minutes
-        total_seconds = summary["grand_total"]["total_seconds"]
-        total_minutes = total_seconds / 60 if total_seconds else 0
-
-        # Extract top languages
-        top_languages = []
-        if summary.get("languages"):
-            top_languages = [lang["name"] for lang in summary["languages"][:3]]
-
-        return {
-            "total_minutes": int(total_minutes),
-            "top_languages": top_languages,
-            "is_up_to_date": True,
-            "range": f"today ({today})"
-        }
-
+        # Store code activity
+        code_log = crud.create_code_log(
+            db=db_session,
+            lines_added=git_stats["lines_added"],
+            lines_removed=git_stats["lines_removed"],
+            total_time_minutes=total_time_minutes
+        )
+        
+        print(f"✅ Code activity logged: +{git_stats['lines_added']}/-{git_stats['lines_removed']} lines")
+        print("📊 Code XP will be calculated at the end of the day")
+        return code_log
+        
     except Exception as e:
-        print(f"⚠️ Error fetching WakaTime summaries: {e}")
-        return {
-            "total_minutes": 0,
-            "top_languages": [],
-            "is_up_to_date": False,
-            "range": "unknown"
-        }
+        print(f"❌ Error logging code activity: {e}")
+    finally:
+        db_session.close()
 
 def run_code_agent():
-    """Run the code agent to track coding activity and award XP"""
-    summaries = get_coding_summaries()
-    git_stats = get_git_stats()
-
-    metrics = {
-        "lines_added": git_stats["lines_added"],
-        "lines_removed": git_stats["lines_removed"],
-        "total_time_minutes": summaries["total_minutes"],
-        "top_languages": summaries["top_languages"]
-    }
-
-    # Log code stats
-    crud.create_code_log(
-        lines_Added=metrics["lines_added"],
-        lines_Removed=metrics["lines_removed"],
-        total_Time_Minutes=metrics["total_time_minutes"]
-    )
-
-    # Calculate XP
-    xp_result = calculateXp(event_type="coding", metrics=metrics)
-    crud.create_xp_event(xp_type="coding", amount=xp_result["xp"])
-    crud.update_level(new_xp=xp_result["xp"])
-
-    print(f"💻 CodeAgent XP Summary:")
-    print(f"   Lines Added: {git_stats['lines_added']}")
-    print(f"   Lines Removed: {git_stats['lines_removed']}")
-    print(f"   Total Time Today: {summaries['total_minutes']} minutes")
-    print(f"   Top Languages: {', '.join(summaries['top_languages']) if summaries['top_languages'] else 'None'}")
-    print(f"   Data Range: {summaries['range']}")
-    print(f"   {xp_result['details']}")
-    
-    if not summaries["is_up_to_date"]:
-        print("   ⚠️ Note: WakaTime data may not be up to date")
+    """
+    Calculate XP for all unprocessed code logs.
+    This function is called by the scheduler.
+    """
+    db_session = get_db_session()
+    try:
+        today = datetime.now().date()
+        
+        # Check if XP has already been awarded for code today
+        xp_awarded = db_session.query(XPEvent).filter(
+            XPEvent.timestamp >= today,
+            XPEvent.xp_type == "code"
+        ).first()
+        
+        if xp_awarded:
+            print(f"⚠️ Code XP already awarded today ({xp_awarded.amount} XP). Skipping.")
+            return
+        
+        # Get unprocessed code logs from today
+        code_logs = db_session.query(CodeLog).filter(
+            CodeLog.date >= today,
+            CodeLog.processed == False
+        ).order_by(CodeLog.date).all()
+        
+        if not code_logs:
+            print("ℹ️ No unprocessed code logs found for today. No XP awarded.")
+            return
+        
+        # Calculate total metrics for the day
+        total_lines_added = sum(log.lines_added for log in code_logs)
+        total_lines_removed = sum(log.lines_removed for log in code_logs)
+        total_time = sum(log.total_time_minutes for log in code_logs)
+        
+        # Calculate XP once for all activity
+        metrics = {
+            "lines_added": total_lines_added,
+            "lines_removed": total_lines_removed,
+            "total_time_minutes": total_time
+        }
+        
+        xp_result = calculateXp(event_type="code", metrics=metrics)
+        
+        # Award XP
+        crud.award_daily_xp("code", xp_result["xp"])
+        
+        # Mark all logs as processed
+        now = datetime.now()
+        for log in code_logs:
+            log.processed = True
+            log.processed_at = now
+        
+        db_session.commit()
+        
+        print(f"🧠 Daily Code XP Awarded: +{xp_result['xp']} XP")
+        if 'details' in xp_result:
+            print(f"📝 {xp_result['details']}")
+            
+    except Exception as e:
+        print(f"❌ Error calculating code XP: {e}")
+        db_session.rollback()
+    finally:
+        db_session.close()
