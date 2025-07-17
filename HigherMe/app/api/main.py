@@ -41,10 +41,32 @@ async def log_meals(request: Request):
         print(f"meal from request  : {meal}")
         log_meals(meal)
         print("Meals logged successfully")
-        return json.response({"message": "Meals logged successfully"})
+        return {"message": "Meals logged successfully"}
     except Exception as e:
         print(f"Error logging meals: {e}")
-        return json.response({"error" : "Failed to log meals"})
+        response = {"error": "Failed to log meals"}
+   
+        return json
+
+
+@app.post("/log-exercise")
+async def log_excercise(req  : Request):
+    db = get_db_session()
+    
+    try:
+       data = await req.json()
+       exercise_minutes = data.get("excercise_minutes" , 0)
+       print(f"excercise minutes from request :  {exercise_minutes}")
+       
+       log_excercise(exercise_minutes)
+       print("Exercise logged successfully")
+       response = {"message": "Exercise logged successfully"}
+       return response
+    except Exception as e:
+        print(f"Error logging exercise: {e}")
+        return {"error": "Failed to log exercise"}
+
+
 
 @app.on_event("startup")
 async def startup_event():
