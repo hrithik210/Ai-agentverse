@@ -4,7 +4,7 @@ from datetime import datetime
 import time
 import logging
 from app.agents.mood_agent import log_mood
-from app.agents.health_agent import log_health_activity, log_meal, log_water_intake, log_sleep, log_exercise
+from app.agents.health_agent import  log_meal, log_water_intake, log_sleep, log_exercise
 from app.agents.code_agent import log_code_activity
 from app.scheduler.scheduler import run_all_daily_tasks
 from app.db.database import get_db_session
