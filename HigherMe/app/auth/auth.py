@@ -22,3 +22,32 @@ def verify_password(plain_password , hashed_password):
 
 def get_password_hash(password):
   return pwd_context.hash(password)
+
+
+def get_current_user(credentials : HTTPAuthorizationCredentials = Depends(security)):
+  credential_exception = HTTPException(
+    status_code=status.HTTP_401_UNAUTHORIZED,
+    detail="could not validate credentials",
+    headers= {"WWW-Authenticate" : "Bearer"},
+  )
+  
+  try:
+    token = credentials.credentials
+    payload = jwt.decode(token , secret_key , algorithms=[algorithm])
+    username : str = payload.get("username")
+    
+    if username is None:
+      raise credential_exception
+  except JWTError:
+    raise credential_exception
+  
+  db = get_db_session()
+  
+  try :
+    user = db.query(User).filter(User.username == username)
+    
+    if user is None:
+      raise credential_exception
+    return user
+  finally:
+    db.close()
