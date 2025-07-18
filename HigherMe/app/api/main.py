@@ -6,6 +6,8 @@ from app.agents.code_agent import log_code_activity
 from app.agents.health_agent import log_meal , log_exercise , log_sleep , log_water_intake
 from app.agents.daily_report_agent import build_daily_report
 from sqlalchemy.orm import Session
+from app.db.models import Level , XPEvent
+from datetime import datetime
 
 
 def get_db():
@@ -119,8 +121,23 @@ async def get_daily_report(db : Session = Depends(get_db())):
         print(f"error occured : {e}")
         raise HTTPException(status_code=500 , detail= str(e))
     
-
-
+@app.get("/api/v1/stats")
+def get_user_stats(db : Session = Depends(get_db())):
+    try:
+        level = db.query(Level).first()
+        
+        today = datetime.now().date()
+        today_xp = db.query(XPEvent).filter(XPEvent.timestamp >= today).all()
+        return {
+            "current_level" : level.current_level if level else 1,
+            "total_xp" : level.total_xp if level else 0,
+            "todays_xp" : sum(xp.amount for xp in today_xp),
+            "xp_breakdown" : {xp.xp_type : xp.amount for xp in today_xp}
+        }
+    except Exception as e:
+        print(f"error in getting stats : {e}")
+        raise HTTPException(status_code=500 , detail = str(e))
+        
 @app.on_event("startup")
 async def startup_event():
     print("🚀 HigherMe API is starting up...")
