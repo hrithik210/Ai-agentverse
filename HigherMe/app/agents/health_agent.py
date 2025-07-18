@@ -182,29 +182,6 @@ def log_exercise(minutes: int):
     finally:
         db_session.close()
 
-def log_health_activity(meals: str, sleep_hours: float, water_liters: float, exercise_minutes: int):
-    """
-    LEGACY: Log all health activities at once.
-    This function is kept for backward compatibility.
-    For new code, use the specialized logging functions instead.
-    """
-    db_session = get_db_session()
-    try:
-        # Store health data
-        health_log = crud.create_health_log(
-            db=db_session,
-            meals=meals,
-            sleep_hours=sleep_hours,
-            water_intake_liter=water_liters,
-            exercise_minutes=exercise_minutes
-        )
-        print("✅ Health activity logged successfully")
-        print("📊 Health XP will be calculated at the end of the day")
-        return health_log
-    except Exception as e:
-        print(f"❌ Error logging health activity: {e}")
-    finally:
-        db_session.close()
 
 def run_health_agent():
     """
