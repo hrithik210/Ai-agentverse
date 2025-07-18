@@ -1,11 +1,19 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request , HTTPException , Depends
 from app.scheduler.scheduler import start
-from requests import Request
 from app.db.database import get_db_session
 from app.agents.mood_agent import log_mood
 from app.agents.code_agent import log_code_activity
-import json
+from app.agents.health_agent import log_meal , log_exercise , log_sleep , log_water_intake
+from app.agents.daily_report_agent import build_daily_report
+from sqlalchemy.orm import Session
 
+
+def get_db():
+    db = get_db_session()
+    try:
+        yield db
+    finally:
+        db.close()
 
 app = FastAPI(
     title="HigherMe API",
@@ -13,8 +21,8 @@ app = FastAPI(
 )
 
 
-@app.post("/log-mood")
-async def log_mood(request  : Request):
+@app.post("/api/v1/mood")
+async def create_mood_log(request  : Request):
     
     
     try:
@@ -25,47 +33,44 @@ async def log_mood(request  : Request):
         
         log_mood(mood_text)
         print("Mood logged successfully")
-        return {"message": "Mood logged successfully"}
+        return {"message": "Mood logged successfully",}
     except Exception as e:
         print(f"Error logging mood: {e}")
-        return {"error": "Failed to log mood"}
+        raise HTTPException(status_code=500 , detail=str(e))
 
 
-@app.post("/log-meals")
-async def log_meals(request: Request):
-
-    
+@app.post("/api/v1/health/meal")
+async def create_meal_log(request: Request):
     try:
         data = await request.json()
         meal = data.get("meal" , "")
         print(f"meal from request  : {meal}")
-        log_meals(meal)
-        print("Meals logged successfully")
+        log_meal(meal)
+        print("Meal logged successfully")
         return {"message": "Meals logged successfully"}
     except Exception as e:
         print(f"Error logging meals: {e}")
-        response = {"error": "Failed to log meals"}
-   
-        return json
+        raise HTTPException(status_code=500 , detail=str(e))
+
 
 
 @app.post("/log-exercise")
-async def log_excercise(req  : Request):
+async def create_exercise_log(req  : Request):
     
     try:
        data = await req.json()
-       exercise_minutes = data.get("excercise_minutes" , 0)
+       exercise_minutes = data.get("exercise_minutes" , 0)
        print(f"excercise minutes from request :  {exercise_minutes}")
        
-       log_excercise(exercise_minutes)
+       log_exercise(exercise_minutes)
        print("Exercise logged successfully")
        response = {"message": "Exercise logged successfully"}
        return response
     except Exception as e:
         print(f"Error logging exercise: {e}")
-        return {"error": "Failed to log exercise"}
+        raise HTTPException(status_code=500 , detail=str(e))
 
-@app.post("/log-sleep")
+@app.post("/api/v1/health/sleep")
 async def log_sleep(req : Request):
     
     try:
@@ -79,10 +84,10 @@ async def log_sleep(req : Request):
     
     except Exception as e:
         print(f"Error logging sleep: {e}")
-        return {"error": "Failed to log sleep"}
+        raise HTTPException(status_code=500 , detail=str(e))
 
-@app.post("/log-water-intake")
-async def log_water_intake(req: Request):    
+@app.post("/api/v1/health/water")
+async def create_water_log(req: Request):    
     try:
         data = await req.json()
         water_intake_liter  = data.get("water_intake", 0.0)
@@ -91,10 +96,10 @@ async def log_water_intake(req: Request):
         return {"message": "Water intake logged successfully"}
     except Exception as e:
         print(f"Error logging water intake: {e}")
-        return {"error": "Failed to log water intake"}
+        raise HTTPException(status_code=500 , detail=str(e))
     
 
-@app.get("/code-activity")
+@app.get("/api/v1/code-activity")
 async def get_code_activity():
     try:
         code_activity = log_code_activity()
@@ -104,6 +109,17 @@ async def get_code_activity():
     except Exception as e:
         print(f"Error fetching code activity: {e}")
         return {"error": "Failed to fetch code activity"}
+
+@app.get("/appi/v1/daily-report")
+async def get_daily_report(db : Session = Depends(get_db())):
+    try:
+        report = build_daily_report(db)
+        return {"report" : report}
+    except Exception as e:
+        print(f"error occured : {e}")
+        raise HTTPException(status_code=500 , detail= str(e))
+    
+
 
 @app.on_event("startup")
 async def startup_event():
