@@ -91,7 +91,7 @@ def get_recent_commit_stats():
         print(f"⚠️ Error getting recent commit stats: {e}")
         return {"lines_added": 0, "lines_removed": 0}
 
-def log_code_activity():
+def log_code_activity(user_id : int):
     """
     Log code activity without calculating XP.
     XP will be calculated by the scheduler at the end of the day.
@@ -109,6 +109,7 @@ def log_code_activity():
         
         # Store code activity
         code_log = crud.create_code_log(
+            user_id= user_id,
             db=db_session,
             lines_added=git_stats["lines_added"],
             lines_removed=git_stats["lines_removed"],
@@ -124,7 +125,7 @@ def log_code_activity():
     finally:
         db_session.close()
 
-def run_code_agent():
+def run_code_agent(user_id : int):
     """
     Calculate XP for all unprocessed code logs.
     This function is called by the scheduler.
@@ -136,7 +137,8 @@ def run_code_agent():
         # Check if XP has already been awarded for code today
         xp_awarded = db_session.query(XPEvent).filter(
             XPEvent.timestamp >= today,
-            XPEvent.xp_type == "code"
+            XPEvent.xp_type == "code",
+            XPEvent.user_id == user_id
         ).first()
         
         if xp_awarded:
@@ -145,6 +147,7 @@ def run_code_agent():
         
         # Get unprocessed code logs from today
         code_logs = db_session.query(CodeLog).filter(
+            CodeLog.user_id == user_id,
             CodeLog.date >= today,
             CodeLog.processed == False
         ).order_by(CodeLog.date).all()
@@ -168,7 +171,7 @@ def run_code_agent():
         xp_result = calculateXp(event_type="code", metrics=metrics)
         
         # Award XP
-        crud.award_daily_xp("code", xp_result["xp"])
+        crud.award_daily_xp("code", xp_result["xp"] ,user_id)
         
         # Mark all logs as processed
         now = datetime.now()
