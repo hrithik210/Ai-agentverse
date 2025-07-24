@@ -147,35 +147,6 @@ def get_or_create_level():
         conn.close()
 
 
-def update_level(new_xp: int):
-    conn = get_db()
-    if not conn:
-        return None
-
-    try:
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT * FROM levels LIMIT 1;")
-            level = cursor.fetchone()
-
-            if level:
-                total_xp = level[2] + new_xp
-                current_level = (total_xp // 100) + 1
-
-                cursor.execute(
-                    """
-                    UPDATE levels
-                    SET total_xp = %s, current_level = %s, last_updated = %s
-                    WHERE id = %s;
-                    """,
-                    (total_xp, current_level, datetime.now(), level[0])
-                )
-                conn.commit()
-                return level[0]
-    except Exception as e:
-        print(f"Error updating level: {e}")
-        return None
-    finally:
-        conn.close()
 
 
 def award_daily_xp(xp_type: str, amount: int, user_id: int):
@@ -198,6 +169,7 @@ def award_daily_xp(xp_type: str, amount: int, user_id: int):
         # Check if XP has already been awarded for this type today
         today = datetime.now().date()
 
+        #get existing xp event
         existing = db.query(XPEvent).filter(
             XPEvent.xp_type == xp_type,
             XPEvent.timestamp >= today,
@@ -217,8 +189,10 @@ def award_daily_xp(xp_type: str, amount: int, user_id: int):
 
         db.add(xp_event)
 
+        #getting level info
         level = db.query(Level).filter(Level.user_id == user_id).first()
 
+        #updating level
         if level:
             level.total_xp += amount
             level.current_level = (level.total_xp // 100) + 1

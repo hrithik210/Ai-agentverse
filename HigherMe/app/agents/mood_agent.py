@@ -63,7 +63,7 @@ def log_mood(mood_text: str , user_id : int):
     finally:
         db.close()
 
-def calculate_daily_mood_xp():
+def calculate_daily_mood_xp(user_id: int):
     """
     Calculate XP for all unprocessed mood logs.
     This function is called by the scheduler.
@@ -76,6 +76,7 @@ def calculate_daily_mood_xp():
         
         # Check if XP has already been awarded for mood today
         xp_awarded = db.query(XPEvent).filter(
+            mood_logs.user_id == user_id,
             XPEvent.timestamp >= today,
             XPEvent.xp_type == "mood"
         ).first()
@@ -86,6 +87,7 @@ def calculate_daily_mood_xp():
         
         # Get unprocessed mood logs from today
         mood_logs = db.query(MoodLog).filter(
+            mood_logs.user_id == user_id,
             MoodLog.timestamp >= today,
             MoodLog.processed == False
         ).order_by(MoodLog.timestamp).all()
@@ -98,7 +100,7 @@ def calculate_daily_mood_xp():
         xp_result = calculateXp(event_type="mood", metrics={"mood_logs": mood_logs})
         
         # Award XP
-        crud.award_daily_xp("mood", xp_result["xp"])
+        crud.award_daily_xp("mood", xp_result["xp"] , user_id=user_id)
         
         # Update processed status
         now = datetime.now()
