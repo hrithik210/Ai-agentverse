@@ -14,31 +14,35 @@ llm = ChatGroq(
     # other params...
 )
 
-def get_today_logs(db: Session):
+def get_today_logs(db: Session , user_id : int):
     today = datetime.now().date()
     tomorrow = today + timedelta(days=1)
 
     xp_events = db.query(XPEvent).filter(
+        XPEvent.user_id == user_id,
         XPEvent.timestamp >= today,
         XPEvent.timestamp < tomorrow
     ).all()
 
     mood_logs = db.query(MoodLog).filter(
+        MoodLog.user_id == user_id,
         MoodLog.timestamp >= today,
         MoodLog.timestamp < tomorrow
     ).all()
 
     health_logs = db.query(HealthLog).filter(
+        HealthLog.user_id == user_id,
         HealthLog.date >= today,
         HealthLog.date < tomorrow
     ).all()
 
     code_logs = db.query(CodeLog).filter(
+        CodeLog.user_id == user_id,
         CodeLog.date >= today,
         CodeLog.date < tomorrow
     ).all()
 
-    level_info = db.query(Level).first()
+    level_info = db.query(Level).filter(Level.user_id == user_id).first()
 
     return {
         "xp_events": xp_events,
@@ -172,8 +176,8 @@ Generate a brief overall summary (2-3 sentences) of today's performance across a
 
 
 
-def build_daily_report(db: Session):
-    logs = get_today_logs(db)
+def build_daily_report(db: Session , user_id : int):
+    logs = get_today_logs(db, user_id)
     
     # Generate XP breakdown and extract details
     xp_section, xp_details = format_xp_breakdown(logs["xp_events"])
