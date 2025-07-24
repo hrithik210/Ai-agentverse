@@ -33,7 +33,7 @@ def analyze_mood_sentiment(text: str) -> float:
         print(f"Error analyzing mood sentiment: {e}")
         return 0.0
 
-def log_mood(mood_text: str):
+def log_mood(mood_text: str , user_id : int):
     """
     Log a mood entry without calculating XP.
     XP will be calculated by the scheduler at the end of the day.
@@ -46,7 +46,8 @@ def log_mood(mood_text: str):
         mood_log = crud.create_mood_log(
             db=db,
             mood_text=mood_text,
-            sentiment=sentiment_score
+            sentiment=sentiment_score,
+            user_id= user_id
         )
         
         if mood_log:

@@ -44,7 +44,7 @@ def get_current_user(credentials : HTTPAuthorizationCredentials = Depends(securi
   db = get_db_session()
   
   try :
-    user = db.query(User).filter(User.username == username)
+    user = db.query(User).filter(User.username == username).first()
     
     if user is None:
       raise credential_exception
