@@ -26,7 +26,7 @@ def create_code_log(db: Session, *, lines_added: int, lines_removed: int, total_
         return None
 
 
-def create_health_log(db: Session, *, meals: str, sleep_hours: float, exercise_minutes: int, water_intake_liter: float):
+def create_health_log(db: Session, *, meals: str, sleep_hours: float, exercise_minutes: int, water_intake_liter: float , user_id  : int):
     try:
         health_log = HealthLog(
             meals=meals,

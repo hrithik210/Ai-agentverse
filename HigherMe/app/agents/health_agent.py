@@ -30,7 +30,7 @@ def score_meal_sentiment(meal_text: str) -> float:
         print(f"Error scoring meal sentiment: {e}")
         return 0.0 
 
-def log_meal(meal_description: str):
+def log_meal(meal_description: str , user_id : int):
     """
     Log a single meal entry. Can be called multiple times a day.
     The existing sleep and exercise values will be preserved if already logged today,
@@ -42,6 +42,7 @@ def log_meal(meal_description: str):
         
         # Check if we already have a health log for today to get sleep and exercise
         existing_log = db_session.query(HealthLog).filter(
+            HealthLog.user_id == user_id,
             HealthLog.date >= today,
             HealthLog.date < today + timedelta(days=1)
         ).order_by(HealthLog.date.desc()).first()
@@ -56,6 +57,7 @@ def log_meal(meal_description: str):
         
         # Store health data (creating new or updating)
         health_log = crud.create_health_log(
+            user_id=user_id,
             db=db_session,
             meals=meals,
             sleep_hours=sleep_hours,
@@ -71,7 +73,7 @@ def log_meal(meal_description: str):
     finally:
         db_session.close()
 
-def log_water_intake(water_liters: float):
+def log_water_intake(water_liters: float , user_id : int):
     """
     Log water intake. Can be called multiple times a day, adding to the daily total.
     """
@@ -82,7 +84,8 @@ def log_water_intake(water_liters: float):
         # Check if we already have a health log for today
         existing_log = db_session.query(HealthLog).filter(
             HealthLog.date >= today,
-            HealthLog.date < today + timedelta(days=1)
+            HealthLog.date < today + timedelta(days=1),
+            HealthLog.user_id == user_id
         ).order_by(HealthLog.date.desc()).first()
         
         # Use existing values or defaults
@@ -95,6 +98,7 @@ def log_water_intake(water_liters: float):
         
         # Store health data
         health_log = crud.create_health_log(
+            user_id=user_id,
             db=db_session,
             meals=meals,
             sleep_hours=sleep_hours,
@@ -110,7 +114,7 @@ def log_water_intake(water_liters: float):
     finally:
         db_session.close()
 
-def log_sleep(hours: float):
+def log_sleep(hours: float , user_id : int):
     """
     Log sleep hours. Intended to be called once per day.
     """
@@ -120,6 +124,7 @@ def log_sleep(hours: float):
         
         # Check if we already have a health log for today
         existing_log = db_session.query(HealthLog).filter(
+            HealthLog.user_id == user_id,
             HealthLog.date >= today,
             HealthLog.date < today + timedelta(days=1)
         ).order_by(HealthLog.date.desc()).first()
@@ -131,6 +136,7 @@ def log_sleep(hours: float):
         
         # Store health data
         health_log = crud.create_health_log(
+            user_id = user_id,
             db=db_session,
             meals=meals,
             sleep_hours=hours,
@@ -146,7 +152,7 @@ def log_sleep(hours: float):
     finally:
         db_session.close()
 
-def log_exercise(minutes: int):
+def log_exercise(minutes: int , user_id : int):
     """
     Log exercise duration in minutes. Intended to be called once per day.
     """
@@ -156,6 +162,7 @@ def log_exercise(minutes: int):
         
         # Check if we already have a health log for today
         existing_log = db_session.query(HealthLog).filter(
+            HealthLog.user_id == user_id,
             HealthLog.date >= today,
             HealthLog.date < today + timedelta(days=1)
         ).order_by(HealthLog.date.desc()).first()
@@ -167,6 +174,7 @@ def log_exercise(minutes: int):
         
         # Store health data
         health_log = crud.create_health_log(
+            user_id=user_id,
             db=db_session,
             meals=meals,
             sleep_hours=sleep_hours,
@@ -183,7 +191,7 @@ def log_exercise(minutes: int):
         db_session.close()
 
 
-def run_health_agent():
+def run_health_agent(user_id : int):
     """
     Calculate XP for all unprocessed health logs.
     This function is called by the scheduler.
@@ -194,6 +202,7 @@ def run_health_agent():
         
         # Check if XP has already been awarded for health today
         xp_awarded = db_session.query(XPEvent).filter(
+            XPEvent.user_id == user_id,
             XPEvent.timestamp >= today,
             XPEvent.xp_type == "health"
         ).first()
@@ -204,6 +213,7 @@ def run_health_agent():
         
         # Get unprocessed health logs from today
         health_logs = db_session.query(HealthLog).filter(
+            HealthLog.user_id == user_id,
             HealthLog.date >= today,
             HealthLog.processed == False
         ).order_by(HealthLog.date).all()
@@ -237,7 +247,7 @@ def run_health_agent():
             log.processed_at = datetime.now()
         
         # Award XP for the day
-        crud.award_daily_xp("health", total_xp)
+        crud.award_daily_xp("health", total_xp , user_id)
         db_session.commit()
         
         print(f"🧠 Daily Health XP Awarded: +{total_xp} XP")
