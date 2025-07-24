@@ -23,6 +23,7 @@ class User(Base):
 class CodeLog(Base):
   __tablename__ = 'code_logs'
   id = Column(Integer, primary_key=True, index=True)
+  user_id = Column(Integer , ForeignKey('users.id') , nullable = False)
   lines_added = Column(Integer)
   lines_removed = Column(Integer)
   total_time_minutes = Column(Float)
@@ -35,6 +36,7 @@ class CodeLog(Base):
 class HealthLog(Base):
   __tablename__ = 'health_logs'
   id = Column(Integer, primary_key = True , index=True)
+  user_id = Column(Integer , ForeignKey('users.id') , nullable = False)
   meals = Column(String)
   sleep_hours = Column(Float)
   exercise_minutes = Column(Integer)
@@ -48,6 +50,7 @@ class HealthLog(Base):
 class MoodLog(Base):
     __tablename__ = "mood_logs"
     id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer , ForeignKey('users.id') , nullable = False)
     mood_text = Column(String)
     sentiment = Column(Float)
     timestamp = Column(DateTime, default=datetime.utcnow)
@@ -59,6 +62,7 @@ class MoodLog(Base):
 class XPEvent(Base):
     __tablename__ = "xp_events"
     id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer , ForeignKey('users.id') , nullable = False)
     xp_type = Column(String)
     amount = Column(Integer)
     timestamp = Column(DateTime, default=datetime.now)
@@ -69,6 +73,7 @@ class XPEvent(Base):
 class Level(Base):
     __tablename__ = "levels"
     id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer , ForeignKey('users.id') , nullable = False)
     current_level = Column(Integer, default=1)
     total_xp = Column(Integer, default=0)
     last_updated = Column(DateTime, default=datetime.now)

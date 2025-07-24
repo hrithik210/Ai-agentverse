@@ -137,7 +137,9 @@ def get_user_stats(db : Session = Depends(get_db())):
     except Exception as e:
         print(f"error in getting stats : {e}")
         raise HTTPException(status_code=500 , detail = str(e))
-        
+
+
+      
 @app.on_event("startup")
 async def startup_event():
     print("🚀 HigherMe API is starting up...")
