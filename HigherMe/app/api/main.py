@@ -8,6 +8,9 @@ from app.agents.daily_report_agent import build_daily_report
 from sqlalchemy.orm import Session
 from app.db.models import Level , XPEvent
 from datetime import datetime
+from app.auth.auth import get_current_user
+from app.db.models import User
+
 
 
 def get_db():
@@ -24,7 +27,7 @@ app = FastAPI(
 
 
 @app.post("/api/v1/mood")
-async def create_mood_log(request  : Request):
+async def create_mood_log(request  : Request, current_user : User = Depends(get_current_user)):
     
     
     try:
@@ -33,7 +36,7 @@ async def create_mood_log(request  : Request):
         
         print(f"mood text from req: {mood_text}")
         
-        log_mood(mood_text)
+        log_mood(mood_text , current_user.id)
         print("Mood logged successfully")
         return {"message": "Mood logged successfully",}
     except Exception as e:
@@ -42,12 +45,12 @@ async def create_mood_log(request  : Request):
 
 
 @app.post("/api/v1/health/meal")
-async def create_meal_log(request: Request):
+async def create_meal_log(request: Request, current_user : User = Depends(get_current_user)):
     try:
         data = await request.json()
         meal = data.get("meal" , "")
         print(f"meal from request  : {meal}")
-        log_meal(meal)
+        log_meal(meal , current_user.id)
         print("Meal logged successfully")
         return {"message": "Meals logged successfully"}
     except Exception as e:
@@ -56,15 +59,15 @@ async def create_meal_log(request: Request):
 
 
 
-@app.post("/log-exercise")
-async def create_exercise_log(req  : Request):
+@app.post("/api/v1/health/exercise")
+async def create_exercise_log(req  : Request, current_user : User = Depends(get_current_user)):
     
     try:
        data = await req.json()
        exercise_minutes = data.get("exercise_minutes" , 0)
        print(f"excercise minutes from request :  {exercise_minutes}")
        
-       log_exercise(exercise_minutes)
+       log_exercise(exercise_minutes , current_user.id)
        print("Exercise logged successfully")
        response = {"message": "Exercise logged successfully"}
        return response
@@ -73,14 +76,14 @@ async def create_exercise_log(req  : Request):
         raise HTTPException(status_code=500 , detail=str(e))
 
 @app.post("/api/v1/health/sleep")
-async def log_sleep(req : Request):
+async def create_sleep_log(req : Request, current_user : User = Depends(get_current_user)):
     
     try:
         data = await req.json()
         
         sleep_hours = data.get("sleep_hours" , 0)
         print(f"Sleep hours from request: {sleep_hours}")
-        log_sleep(sleep_hours)
+        log_sleep(sleep_hours , current_user.id)
         print("sleep logged successfully")
         return {"message": "Sleep logged successfully"}
     
@@ -89,11 +92,11 @@ async def log_sleep(req : Request):
         raise HTTPException(status_code=500 , detail=str(e))
 
 @app.post("/api/v1/health/water")
-async def create_water_log(req: Request):    
+async def create_water_log(req: Request, current_user : User = Depends(get_current_user)):    
     try:
         data = await req.json()
         water_intake_liter  = data.get("water_intake", 0.0)
-        log_water_intake(water_intake_liter)
+        log_water_intake(water_intake_liter , current_user.id)
         print("Water intake logged successfully")
         return {"message": "Water intake logged successfully"}
     except Exception as e:
@@ -101,16 +104,19 @@ async def create_water_log(req: Request):
         raise HTTPException(status_code=500 , detail=str(e))
     
 
-@app.get("/api/v1/code-activity")
-async def get_code_activity():
+@app.post("/api/v1/code-activity")
+async def create_code_activity(current_user : User = Depends(get_current_user)):
     try:
-        code_activity = log_code_activity()
+        code_activity = log_code_activity(current_user.id)
         
-        return code_activity
+        return {
+            "message" : "code logs created",
+            "log_id" : code_activity.id
+            }
     
     except Exception as e:
-        print(f"Error fetching code activity: {e}")
-        return {"error": "Failed to fetch code activity"}
+        print(f"Error logging code activity: {e}")
+        return {"error": "Failed to load code activity"}
 
 @app.get("/appi/v1/daily-report")
 async def get_daily_report(db : Session = Depends(get_db())):
