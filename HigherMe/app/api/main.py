@@ -6,7 +6,7 @@ from app.agents.code_agent import log_code_activity
 from app.agents.health_agent import log_meal , log_exercise , log_sleep , log_water_intake
 from app.agents.daily_report_agent import build_daily_report
 from sqlalchemy.orm import Session
-from app.db.models import Level , XPEvent
+from app.db.models import Level , XPEvent , CodeLog
 from datetime import datetime
 from app.auth.auth import get_current_user
 from app.db.models import User
@@ -104,7 +104,7 @@ async def create_water_log(req: Request, current_user : User = Depends(get_curre
         raise HTTPException(status_code=500 , detail=str(e))
     
 
-@app.post("/api/v1/code-activity")
+@app.post("/api/v1/create-code-activity")
 async def create_code_activity(current_user : User = Depends(get_current_user)):
     try:
         code_activity = log_code_activity(current_user.id)
@@ -117,6 +117,37 @@ async def create_code_activity(current_user : User = Depends(get_current_user)):
     except Exception as e:
         print(f"Error logging code activity: {e}")
         return {"error": "Failed to load code activity"}
+
+@app.get("/api/v1/get-code-activity")
+async def get_code_activity(current_user : User = Depends(get_current_user) , db : Session = Depends(get_db)):
+    try: 
+        today  = datetime.now().date()
+        
+        #todays's code logs
+        code_logs = db.query(CodeLog).filter(
+            CodeLog.user_id == current_user.id,
+            CodeLog.date >= today
+        ).all()
+        
+        return {
+            "code_logs": [
+                {
+                    "id": log.id,
+                    "lines_added": log.lines_added,
+                    "lines_removed": log.lines_removed,
+                    "total_time_minutes": log.total_time_minutes,
+                    "date": log.date.isoformat(),
+                    "processed": log.processed
+                }
+                for log in code_logs
+            ],
+            "total_logs": len(code_logs)
+        }
+    
+    except Exception as e:
+        print(f"error getting code logs: {e}")
+        return {"message" : "error getting code logs"}
+
 
 @app.get("/appi/v1/daily-report")
 async def get_daily_report(db : Session = Depends(get_db())):
