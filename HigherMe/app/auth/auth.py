@@ -23,13 +23,13 @@ def verify_password(plain_password , hashed_password):
 def get_password_hash(password):
   return pwd_context.hash(password)
 
-def create_access_token(data : dict , expire_delta : timedelta):
+def create_access_token(data : dict , expire_delta : timedelta = None):
   to_encode = data.copy()
   
   if expire_delta:
     expire = datetime.now() + expire_delta
   else:
-    expire_delta = datetime.now() + timedelta(hours=24)
+    expire = datetime.now() + timedelta(hours=24)
 
 
   to_encode.update({"exp" : expire})
@@ -51,7 +51,7 @@ def get_current_user(credentials : HTTPAuthorizationCredentials = Depends(securi
   try:
     token = credentials.credentials
     payload = jwt.decode(token , secret_key , algorithms=[algorithm])
-    username : str = payload.get("username")
+    username : str = payload.get("sub")
     
     if username is None:
       raise credential_exception

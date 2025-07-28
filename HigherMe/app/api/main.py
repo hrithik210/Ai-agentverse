@@ -159,7 +159,7 @@ async def get_daily_report(db : Session = Depends(get_db) , current_user  : User
         raise HTTPException(status_code=500 , detail= str(e))
     
 @app.get("/api/v1/stats")
-def get_user_stats(db : Session = Depends(get_db()) , current_user : User = Depends(get_current_user)):
+def get_user_stats(db : Session = Depends(get_db) , current_user : User = Depends(get_current_user)):
     try:
         level = db.query(Level).filter(Level.user_id == current_user.id).first()
         
@@ -223,7 +223,7 @@ async def register(req : Request):
             
             db.add(new_user)
             db.commit()
-            db.refresh()
+            db.refresh(new_user)
             
             #creating access token
             token = create_access_token(data={"sub" : new_user.username})
@@ -255,7 +255,7 @@ async def register(req : Request):
         raise HTTPException(status_code=400, detail="Invalid request data")
 
 
-@app.post("api/v1/auth/login")
+@app.post("/api/v1/auth/login")
 async def login(req : Request):
     try:
         data = await req.json()
@@ -275,11 +275,12 @@ async def login(req : Request):
                 (User.email == login_identifier) | (User.username == login_identifier)
             ).first()
             
+            if not user:
+                raise HTTPException(status_code=401 , detail="invalid credentials")
+            
             if not user.is_active:
                 raise HTTPException(status_code=401 , detail="account deactivated")
             
-            if not user:
-                raise HTTPException(status_code=401 , detail="invalid credentials")
             if not verify_password(password , user.hashed_password):
                 raise HTTPException(status_code=401 , detail="invalid password")
 
@@ -308,6 +309,20 @@ async def login(req : Request):
     except Exception as e:
         print("login req error : {e}")
         raise HTTPException(status_code=400, detail="Invalid request data")
+ 
+ 
+@app.get("/api/v1/auth/me")
+async def get_current_user_info(current_user : User = Depends(get_current_user)):
+    return {
+        "user" : {
+            "id" : current_user.id,
+            "username" : current_user.username,
+            "email"  : current_user.email,
+            "created_at" : current_user.created_at,
+            "is_active" : current_user.is_active
+        }
+    }
+
         
 @app.on_event("startup")
 async def startup_event():
