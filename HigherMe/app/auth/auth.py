@@ -23,7 +23,24 @@ def verify_password(plain_password , hashed_password):
 def get_password_hash(password):
   return pwd_context.hash(password)
 
+def create_access_token(data : dict , expire_delta : timedelta):
+  to_encode = data.copy()
+  
+  if expire_delta:
+    expire = datetime.now() + expire_delta
+  else:
+    expire_delta = datetime.now() + timedelta(hours=24)
 
+
+  to_encode.update({"exp" : expire})
+  
+  secret_key = os.getenv("SECRET_KEY" , '12233')
+  encoded_jwt = jwt.encode(to_encode , secret_key, algorithm="HS256" )
+
+  return encoded_jwt
+  
+  
+  
 def get_current_user(credentials : HTTPAuthorizationCredentials = Depends(security)):
   credential_exception = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,

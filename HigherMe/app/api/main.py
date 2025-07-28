@@ -10,7 +10,7 @@ from app.db.models import Level , XPEvent , CodeLog
 from datetime import datetime
 from app.auth.auth import get_current_user
 from app.db.models import User
-from app.auth.auth import get_password_hash , verify_password
+from app.auth.auth import get_password_hash , verify_password, create_access_token
 
 
 def get_db():
@@ -183,7 +183,7 @@ def get_user_stats(db : Session = Depends(get_db()) , current_user : User = Depe
 async def register(req : Request):
     try:
         data = await req.json()
-        username = data.get("username").strip()
+        username = data.get("username").strip().lower()
         email = data.get("email").strip().lower()
         password = data.get("password")
         
@@ -255,6 +255,60 @@ async def register(req : Request):
         raise HTTPException(status_code=400, detail="Invalid request data")
 
 
+@app.post("api/v1/auth/login")
+async def login(req : Request):
+    try:
+        data = await req.json()
+        login_identifier = data.get("email").strip().lower()
+        password = data.get("password")
+        
+        if not login_identifier:
+            raise HTTPException(status_code=400 , detail= "email missing")
+        if not password:
+            raise HTTPException(status_code=400 , detail= "password cant be empty")
+    
+
+        db = get_db_session()
+        
+        try:
+            user = db.query(User).filter(
+                (User.email == login_identifier) | (User.username == login_identifier)
+            ).first()
+            
+            if not user.is_active:
+                raise HTTPException(status_code=401 , detail="account deactivated")
+            
+            if not user:
+                raise HTTPException(status_code=401 , detail="invalid credentials")
+            if not verify_password(password , user.hashed_password):
+                raise HTTPException(status_code=401 , detail="invalid password")
+
+            token = create_access_token(data= {"sub" : user.username})
+            
+            return {
+                "message" : "login success",
+                "access_token" : token,
+                "token_type" : "bearer",
+                "user": {
+                    "id" : user.id,
+                    "username" : user.username,
+                    "email" : user.email
+                }
+            }
+        except HTTPException:
+            raise
+        except Exception as e:
+            print(f"error while loggin in : {e}")
+            raise HTTPException(status_code=500 , detail="something went wrong")
+        finally:
+            db.close()
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        print("login req error : {e}")
+        raise HTTPException(status_code=400, detail="Invalid request data")
+        
 @app.on_event("startup")
 async def startup_event():
     print("🚀 HigherMe API is starting up...")
