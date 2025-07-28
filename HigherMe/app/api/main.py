@@ -10,7 +10,7 @@ from app.db.models import Level , XPEvent , CodeLog
 from datetime import datetime
 from app.auth.auth import get_current_user
 from app.db.models import User
-
+from app.auth.auth import get_password_hash , verify_password
 
 
 def get_db():
@@ -150,7 +150,7 @@ async def get_code_activity(current_user : User = Depends(get_current_user) , db
 
 
 @app.get("/api/v1/daily-report")
-async def get_daily_report(db : Session = Depends(get_db()) , current_user  : User = Depends(get_current_user)):
+async def get_daily_report(db : Session = Depends(get_db) , current_user  : User = Depends(get_current_user)):
     try:
         report = build_daily_report(db , current_user.id)
         return {"report" : report}
@@ -179,7 +179,82 @@ def get_user_stats(db : Session = Depends(get_db()) , current_user : User = Depe
         raise HTTPException(status_code=500 , detail = str(e))
 
 
-      
+@app.post("/api/v1/auth/register")
+async def register(req : Request):
+    try:
+        data = await req.json()
+        username = data.get("username").strip()
+        email = data.get("email").strip().lower()
+        password = data.get("password")
+        
+        if not username or len(username) < 3:
+            raise HTTPException(status_code=400 , detail="username too small")
+        
+        if not email or "@" not in email :
+            raise HTTPException(status_code=400  , detail= "invalid email lil bro")
+        
+        if not password or len(password) < 6:
+            raise HTTPException(status_code=400 , detail="password must be atleast 6 characters long")
+
+        db = get_db_session()
+        
+        try:
+            #checking for existing user
+            existing_user = db.query(User).filter(
+                (User.username == username) | (User.email == email)
+            ).first()
+            
+            if existing_user:
+                if existing_user.email:
+                    raise HTTPException(status_code=400 , detail="email already in use")
+                else:
+                    raise HTTPException(status_code=400 , detail="username taken")
+            
+            #hashing password
+            hashed_password = get_password_hash(password)
+            
+            new_user = User(
+                username=username,
+                email=email,
+                hashed_password = hashed_password,
+                created_at = datetime.now(),
+                is_active = True
+            )
+            
+            db.add(new_user)
+            db.commit()
+            db.refresh()
+            
+            #creating access token
+            token = create_access_token(data={"sub" : new_user.username})
+            
+            return {
+                "message" : "user registered successfully",
+                "access_token" : token,
+                "token_type" : "bearer",
+                "user" : {
+                    "id" : new_user.id,
+                    "username" : new_user.username,
+                    "email" : new_user.email
+                }
+            }
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            print(f"registration error : {e}")
+            db.rollback()
+            raise HTTPException(status_code=500 ,  detail="error registring user")
+        finally:
+            db.close()
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Registration request error: {e}")
+        raise HTTPException(status_code=400, detail="Invalid request data")
+
+
 @app.on_event("startup")
 async def startup_event():
     print("🚀 HigherMe API is starting up...")
