@@ -159,12 +159,15 @@ async def get_daily_report(db : Session = Depends(get_db())):
         raise HTTPException(status_code=500 , detail= str(e))
     
 @app.get("/api/v1/stats")
-def get_user_stats(db : Session = Depends(get_db())):
+def get_user_stats(db : Session = Depends(get_db()) , current_user : User = Depends(get_current_user)):
     try:
-        level = db.query(Level).first()
+        level = db.query(Level).filter(Level.user_id == current_user.id).first()
         
         today = datetime.now().date()
-        today_xp = db.query(XPEvent).filter(XPEvent.timestamp >= today).all()
+        today_xp = db.query(XPEvent).filter(
+            XPEvent.timestamp >= today,
+            XPEvent.user_id == current_user.id
+            ).all()
         return {
             "current_level" : level.current_level if level else 1,
             "total_xp" : level.total_xp if level else 0,
@@ -178,7 +181,7 @@ def get_user_stats(db : Session = Depends(get_db())):
 
       
 @app.on_event("startup")
-async def startup_event():
+async def startup_event(db : Session = Depends(get_db_session)):
     print("🚀 HigherMe API is starting up...")
-    start()
-    
+    start(db)
+    print("Scheduler started for daily tasks.")
