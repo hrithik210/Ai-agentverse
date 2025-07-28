@@ -14,10 +14,11 @@ logging.getLogger('apscheduler').setLevel(logging.DEBUG)
 scheduler = BackgroundScheduler()
 
 
-def run_all_daily_tasks(db : Session):
+def run_all_daily_tasks():
     print("🧠 Running daily tasks...")
     print("🧠 Running daily XP + report tasks...")
-
+    
+    db = get_db_session()
 
     if not db:
         print("count not get current db session")
@@ -30,13 +31,13 @@ def run_all_daily_tasks(db : Session):
             print(f"found {len(active_users)} active users")
             calculate_daily_mood_xp(user.id)
             run_code_agent(user.id)
-            run_code_agent(user.id)
+            run_health_agent(user.id)
             build_daily_report(db , user.id)
         except Exception as e:
             print(f"error processing daily task , error : {e}")
         
     
 
-def start(db : Session):
-    scheduler.add_job(run_all_daily_tasks, 'interval', seconds=10, args=[db])
-    scheduler.start()
+def start():
+    scheduler.add_job(run_all_daily_tasks, 'interval', seconds=10)
+    scheduler.start(),

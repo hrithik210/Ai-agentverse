@@ -29,6 +29,7 @@ def create_code_log(db: Session, *, lines_added: int, lines_removed: int, total_
 def create_health_log(db: Session, *, meals: str, sleep_hours: float, exercise_minutes: int, water_intake_liter: float , user_id  : int):
     try:
         health_log = HealthLog(
+            user_id=user_id,
             meals=meals,
             sleep_hours=sleep_hours,
             exercise_minutes=exercise_minutes,
@@ -49,9 +50,9 @@ def create_health_log(db: Session, *, meals: str, sleep_hours: float, exercise_m
 def create_mood_log(db: Session, *, mood_text: str, sentiment: float, user_id: int):
     try:
         mood_log = MoodLog(
+            user_id=user_id,
             mood_text=mood_text,
             sentiment=sentiment,
-            user_id=user_id,
             timestamp=datetime.now(),
             processed=False
         )

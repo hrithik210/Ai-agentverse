@@ -149,10 +149,10 @@ async def get_code_activity(current_user : User = Depends(get_current_user) , db
         return {"message" : "error getting code logs"}
 
 
-@app.get("/appi/v1/daily-report")
-async def get_daily_report(db : Session = Depends(get_db())):
+@app.get("/api/v1/daily-report")
+async def get_daily_report(db : Session = Depends(get_db()) , current_user  : User = Depends(get_current_user)):
     try:
-        report = build_daily_report(db)
+        report = build_daily_report(db , current_user.id)
         return {"report" : report}
     except Exception as e:
         print(f"error occured : {e}")
@@ -181,7 +181,7 @@ def get_user_stats(db : Session = Depends(get_db()) , current_user : User = Depe
 
       
 @app.on_event("startup")
-async def startup_event(db : Session = Depends(get_db_session)):
+async def startup_event():
     print("🚀 HigherMe API is starting up...")
-    start(db)
+    start()
     print("Scheduler started for daily tasks.")
