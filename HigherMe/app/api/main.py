@@ -11,8 +11,21 @@ from datetime import datetime
 from app.auth.auth import get_current_user
 from app.db.models import User
 from app.auth.auth import get_password_hash , verify_password, create_access_token
+from fastapi.middleware.cors import CORSMiddleware
 
+# Configure CORS
+app = FastAPI(
+    title="HigherMe API",
+    description="API for HigherMe application",
+)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, replace with specific origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 def get_db():
     db = get_db_session()
     try:
@@ -224,6 +237,17 @@ async def register(req : Request):
             db.add(new_user)
             db.commit()
             db.refresh(new_user)
+            
+            # Create initial level record for the new user
+            from app.db.models import Level
+            initial_level = Level(
+                user_id=new_user.id,
+                current_level=1,
+                total_xp=0,
+                last_updated=datetime.now()
+            )
+            db.add(initial_level)
+            db.commit()
             
             #creating access token
             token = create_access_token(data={"sub" : new_user.username})

@@ -15,6 +15,7 @@ llm = ChatGroq(
 )
 
 def get_today_logs(db: Session , user_id : int):
+    print(f"Fetching today's logs for user {user_id}...")
     today = datetime.now().date()
     tomorrow = today + timedelta(days=1)
 
@@ -43,7 +44,22 @@ def get_today_logs(db: Session , user_id : int):
     ).all()
 
     level_info = db.query(Level).filter(Level.user_id == user_id).first()
-
+    
+    # Create level record if it doesn't exist
+    if not level_info:
+        print(f"⚠️ No level record found for user {user_id}. Creating one...")
+        level_info = Level(
+            user_id=user_id,
+            current_level=1,
+            total_xp=0,
+            last_updated=datetime.now()
+        )
+        db.add(level_info)
+        db.commit()
+        db.refresh(level_info)
+        print(f"✅ Created level record for user {user_id}")
+    
+    print(f"Fetched {len(xp_events)} XP events, {len(mood_logs)} mood logs, {len(health_logs)} health logs, and {len(code_logs)} code logs. , level info: {level_info}")
     return {
         "xp_events": xp_events,
         "mood_logs": mood_logs,
@@ -195,7 +211,13 @@ def build_daily_report(db: Session , user_id : int):
     )
 
     level_info = logs["level"]
-    level_line = f"\n🧬 Current Level: {level_info.current_level} | Total XP: {level_info.total_xp}"
+    print(f"level info : {level_info}")
+    
+    # Handle case where user has no level record yet
+    if level_info:
+        level_line = f"\n🧬 Current Level: {level_info.current_level} | Total XP: {level_info.total_xp}"
+    else:
+        level_line = f"\n🧬 Current Level: 1 | Total XP: 0 (No level record found)"
 
     report = "\n".join([
         "🌅 **Daily Report**",

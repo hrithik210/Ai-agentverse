@@ -5,7 +5,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from app.db.database import engine, Base
-from app.db.models import CodeLog, HealthLog, MoodLog, XPEvent, Level
+from app.db.models import User, CodeLog, HealthLog, MoodLog, XPEvent, Level
 
 def flush_database():
     """
