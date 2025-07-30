@@ -26,17 +26,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 def get_db():
     db = get_db_session()
     try:
         yield db
     finally:
         db.close()
-
-app = FastAPI(
-    title="HigherMe API",
-    description="API for HigherMe application",
-)
 
 
 @app.post("/api/v1/mood")
