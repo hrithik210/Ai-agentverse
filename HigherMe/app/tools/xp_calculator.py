@@ -18,11 +18,19 @@ def calculateXp(event_type: str, metrics: dict) -> dict:
     """
     
     # Handle specific event types with dedicated calculators
-    if event_type == "mood" and "mood_logs" in metrics:
-        return _calculate_mood_performance_xp(metrics["mood_logs"])
+    if event_type == "mood":
+        if "mood_logs" in metrics:
+            return _calculate_mood_performance_xp(metrics["mood_logs"])
+        else:
+            return _calculate_individual_mood_xp(metrics)
         
     if event_type == "health":
-        return _calculate_health_xp(metrics)
+        # Check if this is an individual health activity
+        if "activity_type" in metrics:
+            return _calculate_individual_health_xp(metrics)
+        else:
+            # Fallback to daily health calculation
+            return _calculate_health_xp(metrics)
         
     if event_type == "coding":
         return _calculate_coding_xp(metrics)
@@ -127,11 +135,11 @@ def _fallback_xp_calculation(event_type: str, metrics: dict) -> dict:
             result = _calculate_mood_performance_xp(metrics["mood_logs"])
             xp = result["xp"]
             details = result["details"]
-        # Otherwise fallback to sentiment score only
+        # Otherwise use individual mood calculation
         else:
-            sentiment = metrics.get("sentiment_score", 0)
-            xp = int((sentiment + 1) * 15)  # -1 to 1 → 0 to 30 XP
-            details = f"🧠 Mood XP: +{xp} (based on sentiment score)"
+            result = _calculate_individual_mood_xp(metrics)
+            xp = result["xp"]
+            details = result["details"]
     
     return {"xp": xp, "details": details}
 
@@ -213,3 +221,95 @@ def _calculate_coding_xp(metrics: dict) -> dict:
         "xp": coding_xp,
         "details": details
     }
+
+def _calculate_individual_health_xp(metrics: dict) -> dict:
+    """Calculate XP for individual health activities"""
+    activity_type = metrics.get("activity_type", "")
+    
+    if activity_type == "meal":
+        # XP for logging a meal (5-15 XP based on description quality)
+        description = metrics.get("description", "")
+        base_xp = 5  # Base XP for logging any meal
+        if len(description) > 20:  # Detailed description
+            base_xp += 3
+        if any(word in description.lower() for word in ["healthy", "vegetables", "fruit", "salad", "protein"]):
+            base_xp += 5
+        return {"xp": min(15, base_xp), "details": f"🍽️ Meal logged! +{min(15, base_xp)} XP for nutrition tracking"}
+    
+    elif activity_type == "water":
+        # XP for water intake (2-8 XP based on amount)
+        water_amount = metrics.get("water_intake_liters", 0)
+        total_today = metrics.get("total_water_today", 0)
+        xp = min(8, int(water_amount * 4))  # 4 XP per liter, max 8
+        
+        bonus_msg = ""
+        if total_today >= 2.0:
+            xp += 2
+            bonus_msg = " +2 bonus for reaching daily goal!"
+        
+        return {"xp": xp, "details": f"💧 Hydration! +{xp} XP for {water_amount}L water{bonus_msg}"}
+    
+    elif activity_type == "sleep":
+        # XP for sleep logging (5-20 XP based on hours)
+        hours = metrics.get("sleep_hours", 0)
+        if hours >= 7 and hours <= 9:
+            xp = 20  # Optimal sleep
+            details = f"😴 Perfect sleep! +{xp} XP for {hours} hours of optimal rest"
+        elif hours >= 6:
+            xp = 15  # Good sleep
+            details = f"😴 Good sleep! +{xp} XP for {hours} hours of rest"
+        elif hours >= 4:
+            xp = 10  # Minimal sleep
+            details = f"😴 Some rest! +{xp} XP for {hours} hours (try for 7-9 hours)"
+        else:
+            xp = 5   # Very little sleep
+            details = f"😴 Rest logged! +{xp} XP for {hours} hours (aim for more rest!)"
+        
+        return {"xp": xp, "details": details}
+    
+    elif activity_type == "exercise":
+        # XP for exercise (5-25 XP based on duration)
+        minutes = metrics.get("exercise_minutes", 0)
+        if minutes >= 60:
+            xp = 25  # Long workout
+            details = f"💪 Intense workout! +{xp} XP for {minutes} minutes of exercise"
+        elif minutes >= 30:
+            xp = 20  # Good workout
+            details = f"💪 Great workout! +{xp} XP for {minutes} minutes of exercise"
+        elif minutes >= 15:
+            xp = 15  # Short workout
+            details = f"💪 Good effort! +{xp} XP for {minutes} minutes of exercise"
+        else:
+            xp = 10  # Minimal exercise
+            details = f"💪 Activity logged! +{xp} XP for {minutes} minutes (aim for 30+ minutes)"
+        
+        return {"xp": xp, "details": details}
+    
+    # Fallback for unknown activity type
+    return {"xp": 5, "details": f"💚 Health activity logged! +5 XP"}
+
+def _calculate_individual_mood_xp(metrics: dict) -> dict:
+    """Calculate XP for individual mood entries"""
+    sentiment_score = metrics.get("sentiment_score", 0)
+    mood_text = metrics.get("mood_text", "")
+    
+    # Base XP calculation from sentiment (-1 to 1 -> 2 to 12 XP)
+    base_xp = int((sentiment_score + 1) * 5) + 2  # Gives 2-12 XP range
+    
+    # Bonus for detailed entries
+    if len(mood_text) > 20:
+        base_xp += 3
+    if len(mood_text) > 50:
+        base_xp += 2
+    
+    # Bonus for positive sentiment
+    if sentiment_score > 0.3:
+        base_xp += 3
+        details = f"🧠 Positive mood logged! +{base_xp} XP for emotional awareness and positivity"
+    elif sentiment_score > -0.3:
+        details = f"🧠 Mood tracked! +{base_xp} XP for emotional self-awareness"
+    else:
+        base_xp += 2  # Small bonus for acknowledging difficult emotions
+        details = f"🧠 Emotions acknowledged! +{base_xp} XP for honest self-reflection"
+    
+    return {"xp": min(20, base_xp), "details": details}

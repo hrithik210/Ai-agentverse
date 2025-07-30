@@ -93,8 +93,8 @@ def get_recent_commit_stats():
 
 def log_code_activity(user_id : int):
     """
-    Log code activity without calculating XP.
-    XP will be calculated by the scheduler at the end of the day.
+    Log code activity and immediately calculate and award XP.
+    Each code activity log now earns XP instantly like a real gaming system.
     """
     db_session = get_db_session()
     try:
@@ -116,8 +116,25 @@ def log_code_activity(user_id : int):
             total_time_minutes=total_time_minutes
         )
         
+        # Calculate and award XP immediately
+        from app.tools.xp_calculator import calculateXp
+        xp_result = calculateXp(event_type="coding", metrics={
+            "lines_added": git_stats["lines_added"],
+            "lines_removed": git_stats["lines_removed"],
+            "total_time_minutes": total_time_minutes
+        })
+        
+        # Award XP immediately
+        crud.award_xp("code", xp_result["xp"], user_id=user_id)
+        
+        # Mark this log as processed since we've already awarded XP
+        code_log.processed = True
+        code_log.processed_at = datetime.now()
+        db_session.add(code_log)
+        db_session.commit()
+        
         print(f"✅ Code activity logged: +{git_stats['lines_added']}/-{git_stats['lines_removed']} lines")
-        print("📊 Code XP will be calculated at the end of the day")
+        print(f"🎮 {xp_result['details']}")
         return code_log
         
     except Exception as e:
@@ -171,7 +188,7 @@ def run_code_agent(user_id : int):
         xp_result = calculateXp(event_type="code", metrics=metrics)
         
         # Award XP
-        crud.award_daily_xp("code", xp_result["xp"] ,user_id)
+        crud.award_xp("code", xp_result["xp"] ,user_id)
         
         # Mark all logs as processed
         now = datetime.now()

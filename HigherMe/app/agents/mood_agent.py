@@ -35,8 +35,8 @@ def analyze_mood_sentiment(text: str) -> float:
 
 def log_mood(mood_text: str , user_id : int):
     """
-    Log a mood entry without calculating XP.
-    XP will be calculated by the scheduler at the end of the day.
+    Log a mood entry and immediately calculate and award XP.
+    Each mood log now earns XP instantly like a real gaming system.
     """
     db = get_db_session()
     try:
@@ -52,7 +52,21 @@ def log_mood(mood_text: str , user_id : int):
         
         if mood_log:
             print(f"✅ Mood logged with sentiment score: {sentiment_score}")
-            print("📊 Mood XP will be calculated at the end of the day")
+            
+            # Calculate XP for this specific mood entry
+            from app.tools.xp_calculator import calculateXp
+            xp_result = calculateXp(event_type="mood", metrics={"sentiment_score": sentiment_score, "mood_text": mood_text})
+            
+            # Award XP immediately
+            crud.award_xp("mood", xp_result["xp"], user_id=user_id)
+            
+            # Mark this log as processed since we've already awarded XP
+            mood_log.processed = True
+            mood_log.processed_at = datetime.now()
+            db.add(mood_log)
+            db.commit()
+            
+            print(f"🎮 {xp_result['details']}")
             return mood_log
         else:
             print("❌ Failed to log mood")
@@ -100,7 +114,7 @@ def calculate_daily_mood_xp(user_id: int):
         xp_result = calculateXp(event_type="mood", metrics={"mood_logs": mood_logs})
         
         # Award XP
-        crud.award_daily_xp("mood", xp_result["xp"] , user_id=user_id)
+        crud.award_xp("mood", xp_result["xp"] , user_id=user_id)
         
         # Update processed status
         now = datetime.now()

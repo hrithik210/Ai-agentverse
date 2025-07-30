@@ -57,10 +57,5 @@ export interface CodeLog {
 }
 
 export interface DailyReport {
-  date: string;
-  mood_average: number;
-  health_score: number;
-  code_activity: CodeLog[];
-  total_xp_earned: number;
-  achievements: string[];
+  report: string;
 }

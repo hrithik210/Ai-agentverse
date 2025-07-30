@@ -150,37 +150,25 @@ def get_or_create_level():
 
 
 
-def award_daily_xp(xp_type: str, amount: int, user_id: int):
+def award_xp(xp_type: str, amount: int, user_id: int):
     """
     Award XP for a particular type of event and update the level in one transaction.
-    Checks if XP has already been awarded for this type today to prevent duplicates.
+    This function allows multiple XP awards per day for the same activity type,
+    creating a cumulative gaming-like experience.
 
     Args:
         xp_type: The type of activity (e.g., "health", "mood", "coding")
         amount: The amount of XP to award
+        user_id: The ID of the user earning XP
 
     Returns:
-        The ID of the created XP event, or None if failed/duplicate
+        The ID of the created XP event, or None if failed
     """
 
     db = get_db_session()
 
     try:
-
-        # Check if XP has already been awarded for this type today
-        today = datetime.now().date()
-
-        #get existing xp event
-        existing = db.query(XPEvent).filter(
-            XPEvent.xp_type == xp_type,
-            XPEvent.timestamp >= today,
-            XPEvent.user_id == user_id
-        ).first()
-
-        if existing:
-            print(f"XP already awarded for {xp_type} today. Skipping.")
-            return None
-
+        # Create new XP event (no daily restriction)
         xp_event = XPEvent(
             user_id=user_id,
             xp_type=xp_type,
@@ -190,17 +178,34 @@ def award_daily_xp(xp_type: str, amount: int, user_id: int):
 
         db.add(xp_event)
 
-        #getting level info
+        # Get or create level info for user
         level = db.query(Level).filter(Level.user_id == user_id).first()
 
-        #updating level
+        # Update level and XP
         if level:
             level.total_xp += amount
             level.current_level = (level.total_xp // 100) + 1
+            level.last_updated = datetime.now()
         else:
-            level = Level(user_id=user_id, total_xp=amount, current_level=1)
+            # Create initial level record if it doesn't exist
+            level = Level(
+                user_id=user_id, 
+                total_xp=amount, 
+                current_level=(amount // 100) + 1,
+                last_updated=datetime.now()
+            )
             db.add(level)
 
         db.commit()
+        db.refresh(xp_event)
+        
+        print(f"Awarded {amount} XP for {xp_type} to user {user_id}. Total XP: {level.total_xp}, Level: {level.current_level}")
+        
+        return xp_event.id
+        
+    except Exception as e:
+        db.rollback()
+        print(f"Error awarding XP: {e}")
+        return None
     finally:
         db.close()

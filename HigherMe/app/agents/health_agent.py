@@ -32,9 +32,8 @@ def score_meal_sentiment(meal_text: str) -> float:
 
 def log_meal(meal_description: str , user_id : int):
     """
-    Log a single meal entry. Can be called multiple times a day.
-    The existing sleep and exercise values will be preserved if already logged today,
-    otherwise defaults will be used.
+    Log a single meal entry and immediately award XP.
+    Each meal logged earns XP instantly like a real gaming system.
     """
     db_session = get_db_session()
     try:
@@ -65,8 +64,21 @@ def log_meal(meal_description: str , user_id : int):
             exercise_minutes=exercise_minutes
         )
         
+        # Calculate and award XP immediately for this meal
+        # Simple meal scoring: assume neutral meal (0) for now, can be enhanced later
+        meal_score = 0.0  # Range: -1 (unhealthy) to 1 (very healthy)
+        from app.tools.xp_calculator import calculateXp
+        xp_result = calculateXp(event_type="health", metrics={
+            "meal_score": meal_score,
+            "activity_type": "meal",
+            "description": meal_description
+        })
+        
+        # Award XP immediately
+        crud.award_xp("health_meal", xp_result["xp"], user_id=user_id)
+        
         print("✅ Meal logged successfully")
-        print("📊 Nutrition XP will be calculated at the end of the day")
+        print(f"🎮 {xp_result['details']}")
         return health_log
     except Exception as e:
         print(f"❌ Error logging meal: {e}")
@@ -106,8 +118,19 @@ def log_water_intake(water_liters: float , user_id : int):
             exercise_minutes=exercise_minutes
         )
         
+        # Calculate and award XP immediately for this water intake
+        from app.tools.xp_calculator import calculateXp
+        xp_result = calculateXp(event_type="health", metrics={
+            "water_intake_liters": water_liters,
+            "activity_type": "water",
+            "total_water_today": water_intake
+        })
+        
+        # Award XP immediately
+        crud.award_xp("health_water", xp_result["xp"], user_id=user_id)
+        
         print(f"✅ Water intake logged: {water_liters}L (Daily total: {water_intake}L)")
-        print("📊 Health XP will be calculated at the end of the day")
+        print(f"🎮 {xp_result['details']}")
         return health_log
     except Exception as e:
         print(f"❌ Error logging water intake: {e}")
@@ -144,8 +167,18 @@ def log_sleep(hours: float , user_id : int):
             exercise_minutes=exercise_minutes
         )
         
+        # Calculate and award XP immediately for sleep
+        from app.tools.xp_calculator import calculateXp
+        xp_result = calculateXp(event_type="health", metrics={
+            "sleep_hours": hours,
+            "activity_type": "sleep"
+        })
+        
+        # Award XP immediately
+        crud.award_xp("health_sleep", xp_result["xp"], user_id=user_id)
+        
         print(f"✅ Sleep logged: {hours} hours")
-        print("📊 Health XP will be calculated at the end of the day")
+        print(f"🎮 {xp_result['details']}")
         return health_log
     except Exception as e:
         print(f"❌ Error logging sleep: {e}")
@@ -182,8 +215,18 @@ def log_exercise(minutes: int , user_id : int):
             exercise_minutes=minutes
         )
         
+        # Calculate and award XP immediately for exercise
+        from app.tools.xp_calculator import calculateXp
+        xp_result = calculateXp(event_type="health", metrics={
+            "exercise_minutes": minutes,
+            "activity_type": "exercise"
+        })
+        
+        # Award XP immediately
+        crud.award_xp("health_exercise", xp_result["xp"], user_id=user_id)
+        
         print(f"✅ Exercise logged: {minutes} minutes")
-        print("📊 Health XP will be calculated at the end of the day")
+        print(f"🎮 {xp_result['details']}")
         return health_log
     except Exception as e:
         print(f"❌ Error logging exercise: {e}")
@@ -247,7 +290,7 @@ def run_health_agent(user_id : int):
             log.processed_at = datetime.now()
         
         # Award XP for the day
-        crud.award_daily_xp("health", total_xp , user_id)
+        crud.award_xp("health", total_xp , user_id)
         db_session.commit()
         
         print(f"🧠 Daily Health XP Awarded: +{total_xp} XP")
