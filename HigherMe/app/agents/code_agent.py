@@ -1,5 +1,4 @@
 import os
-import httpx
 import subprocess
 from datetime import datetime, timedelta
 from dotenv import load_dotenv

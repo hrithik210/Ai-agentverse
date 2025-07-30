@@ -97,11 +97,11 @@ def build_mood_summary(mood_logs, xp_details):
     # Use XP details if available, otherwise fallback to basic summary
     if xp_details:
         prompt = f"""
-Based on the mood XP analysis, create a brief summary (2-3 sentences) of today's emotional progress. Be encouraging and insightful.
+You are a wise and grounded mentor. Based on the following XP analysis, write a brief (2-3 sentence) summary of today's emotional progress.
+
+Avoid over-enthusiasm. Be realistic, encouraging, and thoughtful. Highlight emotional awareness, reflection, and meaningful changes.
 
 Mood XP Details: {xp_details}
-
-Focus on emotional growth and awareness patterns.
 """
         try:
             response = llm.invoke(prompt).content.strip()
@@ -120,11 +120,11 @@ def build_health_summary(health_logs, xp_details):
     # Use XP details if available, otherwise fallback to basic summary
     if xp_details:
         prompt = f"""
-Based on the health XP analysis, create a brief summary (2-3 sentences) of today's wellness activities. Be motivational and specific.
+You are a no-nonsense health coach. Based on the XP analysis below, write a 2-3 sentence summary of today's health activity.
+
+Keep it real — acknowledge actual effort and habits. Avoid generic praise. Be supportive and direct. Mention wins *and* missed opportunities.
 
 Health XP Details: {xp_details}
-
-Focus on health achievements and areas of improvement.
 """
         try:
             response = llm.invoke(prompt).content.strip()
@@ -143,11 +143,11 @@ def build_code_summary(code_logs, xp_details):
     # Use XP details if available, otherwise fallback to basic summary
     if xp_details:
         prompt = f"""
-Based on the coding XP analysis, create a brief summary (2-3 sentences) of today's development work. Be tech-focused and encouraging.
+You're a pragmatic senior developer. Based on the XP analysis below, write a short (2–3 sentence) summary of today's coding session.
+
+Be realistic. Highlight actual effort, focus, and meaningful contributions. Skip hype — celebrate growth and progress with a mentor's tone.
 
 Coding XP Details: {xp_details}
-
-Focus on productivity and coding achievements.
 """
         try:
             response = llm.invoke(prompt).content.strip()
@@ -174,14 +174,18 @@ def build_overall_summary(mood_logs, health_logs, code_logs, xp_events, xp_detai
             details_lines.append(f"- {xp_type.capitalize()}: {details}")
         details_context = f"\n\nXP Analysis Details:\n" + "\n".join(details_lines)
     
+   
+
     context = f"""
-Today's activity summary:
+You are a wise accountability partner. Given this overview of today's activity, write a grounded, encouraging 2–3 sentence summary.
+
+Avoid overhyping. Be real, constructive, and human. Mention what went well, and gently point out areas to improve.
+
+Summary Data:
 - {mood_count} mood logs
 - {health_count} health logs  
 - {code_count} coding sessions
 - {total_xp} total XP earned{details_context}
-
-Generate a brief overall summary (2-3 sentences) of today's performance across all areas. Be encouraging, specific, and highlight key achievements or areas for improvement based on the XP analysis.
 """
     
     try:
