@@ -17,10 +17,13 @@ app = FastAPI(
     title="HigherMe API",
     description="API for HigherMe application",
 )
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with specific origins
+    allow_origins=[os.getenv("FRONTEND_URL", "http://localhost:3000")],  # Load from .env file
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -246,6 +249,7 @@ async def register(req : Request):
             
             # Create initial level record for the new user
             from app.db.models import Level
+
             initial_level = Level(
                 user_id=new_user.id,
                 current_level=1,
