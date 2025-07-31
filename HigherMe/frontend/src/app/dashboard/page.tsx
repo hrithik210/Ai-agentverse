@@ -9,10 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { 
-  User, 
-  Trophy, 
+  User,  
   Zap, 
-  Heart, 
   Brain, 
   Code2, 
   Utensils, 
@@ -22,7 +20,6 @@ import {
   LogOut,
   TrendingUp,
   Calendar,
-  Activity,
   Plus,
   Star
 } from 'lucide-react';
@@ -204,7 +201,7 @@ const DailyReportComponent = ({ report }: { report: string }) => {
 };
 
 // XP Notification Component
-const XPNotificationComponent = ({ notifications, onDismiss }: { 
+const XPNotificationComponent = ({ notifications}: { 
   notifications: XPNotification[], 
   onDismiss: (id: string) => void 
 }) => {
@@ -486,7 +483,6 @@ export default function Dashboard() {
     setXpNotifications(prev => prev.filter(n => n.id !== id));
   };
 
-  const xpToNextLevel = stats ? Math.ceil((stats.current_level + 1) * 100) : 100;
   const currentLevelXp = stats ? stats.total_xp % 100 : 0;
   const xpProgress = (currentLevelXp / 100) * 100;
 
