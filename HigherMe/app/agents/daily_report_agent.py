@@ -136,34 +136,31 @@ Health XP Details: {xp_details}
         return f"💪 **Health:** {len(health_logs)} health entries logged today."
 
 
-def build_code_summary(code_logs, xp_details):
-    if not code_logs:
-        return "⌨️ **Code:** No coding activity today."
+# def build_code_summary(code_logs, xp_details):
+#     if not code_logs:
+#         return "⌨️ **Code:** No coding activity today."
     
-    # Use XP details if available, otherwise fallback to basic summary
-    if xp_details:
-        prompt = f"""
-You're a pragmatic senior developer. Based on the XP analysis below, write a short (2–3 sentence) summary of today's coding session.
+#     # Use XP details if available, otherwise fallback to basic summary
+#     if xp_details:
+#         prompt = f"""
+# You're a pragmatic senior developer. Based on the XP analysis below, write a short (2–3 sentence) summary of today's coding session.
 
-Be realistic. Highlight actual effort, focus, and meaningful contributions. Skip hype — celebrate growth and progress with a mentor's tone.
+# Be realistic. Highlight actual effort, focus, and meaningful contributions. Skip hype — celebrate growth and progress with a mentor's tone.
 
-Coding XP Details: {xp_details}
-"""
-        try:
-            response = llm.invoke(prompt).content.strip()
-            return f"⌨️ **Code:** {response}"
-        except Exception as e:
-            return f"⌨️ **Code:** ❌ Failed to generate summary: {e}"
-    else:
-        # Fallback to basic count
-        return f"⌨️ **Code:** {len(code_logs)} coding sessions logged today."
+# Coding XP Details: {xp_details}
+# """
+#         try:
+#             response = llm.invoke(prompt).content.strip()
+#             return f"⌨️ **Code:** {response}"
+#         except Exception as e:
+#             return f"⌨️ **Code:** ❌ Failed to generate summary: {e}"
+#     else:
+#         # Fallback to basic count
+#         return f"⌨️ **Code:** {len(code_logs)} coding sessions logged today."
 
 
 def build_overall_summary(mood_logs, health_logs, code_logs, xp_events, xp_details):
     # Prepare context for overall summary
-    mood_count = len(mood_logs)
-    health_count = len(health_logs)
-    code_count = len(code_logs)
     total_xp = sum(xp.amount for xp in xp_events)
     
     # Include XP details in the context if available
@@ -182,9 +179,8 @@ You are a wise accountability partner. Given this overview of today's activity, 
 Avoid overhyping. Be real, constructive, and human. Mention what went well, and gently point out areas to improve.
 
 Summary Data:
-- {mood_count} mood logs
-- {health_count} health logs  
-- {code_count} coding sessions
+- {mood_logs} mood logs
+- {health_logs} health logs  
 - {total_xp} total XP earned{details_context}
 """
     
