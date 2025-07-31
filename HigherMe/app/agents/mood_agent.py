@@ -54,7 +54,7 @@ def log_mood(mood_text: str , user_id : int):
             print(f"✅ Mood logged with sentiment score: {sentiment_score}")
             
             # Calculate XP for this specific mood entry
-            from app.tools.xp_calculator import calculateXp
+            from tools.xp_calculator import calculateXp
             xp_result = calculateXp(event_type="mood", metrics={"sentiment_score": sentiment_score, "mood_text": mood_text})
             
             # Award XP immediately
@@ -82,7 +82,7 @@ def calculate_daily_mood_xp(user_id: int):
     Calculate XP for all unprocessed mood logs.
     This function is called by the scheduler.
     """
-    from app.tools.xp_calculator import calculateXp
+    from tools.xp_calculator import calculateXp
     
     db = get_db_session()
     try:

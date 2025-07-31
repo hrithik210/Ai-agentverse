@@ -116,7 +116,7 @@ def log_code_activity(user_id : int):
         )
         
         # Calculate and award XP immediately
-        from app.tools.xp_calculator import calculateXp
+        from tools.xp_calculator import calculateXp
         xp_result = calculateXp(event_type="coding", metrics={
             "lines_added": git_stats["lines_added"],
             "lines_removed": git_stats["lines_removed"],

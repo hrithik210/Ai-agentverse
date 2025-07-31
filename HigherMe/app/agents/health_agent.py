@@ -67,7 +67,7 @@ def log_meal(meal_description: str , user_id : int):
         # Calculate and award XP immediately for this meal
         # Simple meal scoring: assume neutral meal (0) for now, can be enhanced later
         meal_score = 0.0  # Range: -1 (unhealthy) to 1 (very healthy)
-        from app.tools.xp_calculator import calculateXp
+        from tools.xp_calculator import calculateXp
         xp_result = calculateXp(event_type="health", metrics={
             "meal_score": meal_score,
             "activity_type": "meal",
@@ -119,7 +119,7 @@ def log_water_intake(water_liters: float , user_id : int):
         )
         
         # Calculate and award XP immediately for this water intake
-        from app.tools.xp_calculator import calculateXp
+        from tools.xp_calculator import calculateXp
         xp_result = calculateXp(event_type="health", metrics={
             "water_intake_liters": water_liters,
             "activity_type": "water",
@@ -168,7 +168,7 @@ def log_sleep(hours: float , user_id : int):
         )
         
         # Calculate and award XP immediately for sleep
-        from app.tools.xp_calculator import calculateXp
+        from tools.xp_calculator import calculateXp
         xp_result = calculateXp(event_type="health", metrics={
             "sleep_hours": hours,
             "activity_type": "sleep"
@@ -216,7 +216,7 @@ def log_exercise(minutes: int , user_id : int):
         )
         
         # Calculate and award XP immediately for exercise
-        from app.tools.xp_calculator import calculateXp
+        from tools.xp_calculator import calculateXp
         xp_result = calculateXp(event_type="health", metrics={
             "exercise_minutes": minutes,
             "activity_type": "exercise"

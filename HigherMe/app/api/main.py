@@ -248,7 +248,7 @@ async def register(req : Request):
             db.refresh(new_user)
             
             # Create initial level record for the new user
-            from app.db.models import Level
+            from db.models import Level
 
             initial_level = Level(
                 user_id=new_user.id,
