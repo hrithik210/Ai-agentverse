@@ -228,7 +228,6 @@ def build_daily_report(db: Session , user_id : int):
         "",
         health_section,
         "",
-        code_section,
         overall_section,
         level_line
     ])
