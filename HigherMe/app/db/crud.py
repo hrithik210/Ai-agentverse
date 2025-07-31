@@ -1,4 +1,3 @@
-import psycopg2
 from datetime import datetime
 from app.db.database import get_db
 from sqlalchemy.orm import Session

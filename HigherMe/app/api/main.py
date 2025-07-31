@@ -1,5 +1,4 @@
 from fastapi import FastAPI, Request , HTTPException , Depends
-from app.scheduler.scheduler import start
 from app.db.database import get_db_session
 from app.agents.mood_agent import log_mood
 from app.agents.code_agent import log_code_activity
@@ -353,10 +352,3 @@ async def get_current_user_info(current_user : User = Depends(get_current_user))
             "is_active" : current_user.is_active
         }
     }
-
-        
-@app.on_event("startup")
-async def startup_event():
-    print("🚀 HigherMe API is starting up...")
-    start()
-    print("Scheduler started for daily tasks.")
