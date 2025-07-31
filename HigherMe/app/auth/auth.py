@@ -14,7 +14,7 @@ load_dotenv()
 secret_key = os.getenv("SECRET_KEY")
 algorithm = "HS256"
 
-pwd_context = CryptContext(schemes=['bcrypt'])
+pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 security = HTTPBearer()
 
 def verify_password(plain_password , hashed_password):
