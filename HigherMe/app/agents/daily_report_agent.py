@@ -201,7 +201,7 @@ def build_daily_report(db: Session , user_id : int):
     # Generate section summaries using XP details
     mood_section = build_mood_summary(logs["mood_logs"], xp_details.get("mood"))
     health_section = build_health_summary(logs["health_logs"], xp_details.get("health"))
-    code_section = build_code_summary(logs["code_logs"], xp_details.get("code"))
+    # code_section = build_code_summary(logs["code_logs"], xp_details.get("code"))
     overall_section = build_overall_summary(
         logs["mood_logs"], 
         logs["health_logs"], 
