@@ -1,15 +1,15 @@
 from fastapi import FastAPI, Request , HTTPException , Depends
-from app.db.database import get_db_session
-from app.agents.mood_agent import log_mood
-from app.agents.code_agent import log_code_activity
-from app.agents.health_agent import log_meal , log_exercise , log_sleep , log_water_intake
-from app.agents.daily_report_agent import build_daily_report
+from db.database import get_db_session
+from agents.mood_agent import log_mood
+from agents.code_agent import log_code_activity
+from agents.health_agent import log_meal , log_exercise , log_sleep , log_water_intake
+from agents.daily_report_agent import build_daily_report
 from sqlalchemy.orm import Session
-from app.db.models import Level , XPEvent , CodeLog
+from db.models import Level , XPEvent , CodeLog
 from datetime import datetime
-from app.auth.auth import get_current_user
-from app.db.models import User
-from app.auth.auth import get_password_hash , verify_password, create_access_token
+from auth.auth import get_current_user
+from db.models import User
+from auth.auth import get_password_hash , verify_password, create_access_token
 from fastapi.middleware.cors import CORSMiddleware
 
 # Configure CORS

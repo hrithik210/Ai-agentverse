@@ -1,11 +1,11 @@
-from app.db import crud
+from db import crud
 from sqlalchemy.orm import Session
 from datetime import datetime
 import os
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
-from app.db.database import get_db_session
-from app.db.models import MoodLog, XPEvent
+from db.database import get_db_session
+from db.models import MoodLog, XPEvent
 
 load_dotenv()
 

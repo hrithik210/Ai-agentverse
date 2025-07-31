@@ -1,8 +1,8 @@
 from datetime import datetime
-from app.db.database import get_db
+from db.database import get_db
 from sqlalchemy.orm import Session
-from app.db.models import CodeLog, HealthLog, MoodLog, XPEvent, Level
-from app.db.database import get_db_session
+from db.models import CodeLog, HealthLog, MoodLog, XPEvent, Level
+from db.database import get_db_session
 
 
 def create_code_log(db: Session, *, lines_added: int, lines_removed: int, total_time_minutes: float, user_id: int):

@@ -1,11 +1,11 @@
-from app.db import crud
-from app.tools.xp_calculator import calculateXp
+from db import crud
+from tools.xp_calculator import calculateXp
 from datetime import datetime, timedelta
 from langchain_groq import ChatGroq
 import os
 from dotenv import load_dotenv
-from app.db.database import get_db_session
-from app.db.models import HealthLog, XPEvent
+from db.database import get_db_session
+from db.models import HealthLog, XPEvent
 
 load_dotenv()
 
@@ -248,7 +248,7 @@ def run_health_agent(user_id : int):
             XPEvent.user_id == user_id,
             XPEvent.timestamp >= today,
             XPEvent.xp_type == "health"
-        ).first()
+        ).fir
         
         if xp_awarded:
             print(f"⚠️ Health XP already awarded today ({xp_awarded.amount} XP). Skipping.")

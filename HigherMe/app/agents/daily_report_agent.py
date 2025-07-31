@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
-from app.db.models import XPEvent, MoodLog, HealthLog, CodeLog, Level
+from db.models import XPEvent, MoodLog, HealthLog, CodeLog, Level
 import os
 from langchain_groq import ChatGroq
 from dotenv import load_dotenv

@@ -4,8 +4,8 @@ from datetime import datetime , timedelta
 from fastapi import HTTPException, status, Depends
 from fastapi.security import HTTPBearer , HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
-from app.db.models import User
-from app.db.database import get_db_session
+from db.models import User
+from db.database import get_db_session
 import os
 from dotenv import load_dotenv
 

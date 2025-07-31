@@ -2,10 +2,10 @@ import os
 import subprocess
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
-from app.db import crud
-from app.tools.xp_calculator import calculateXp
-from app.db.database import get_db_session
-from app.db.models import CodeLog, XPEvent
+from db import crud
+from tools.xp_calculator import calculateXp
+from db.database import get_db_session
+from db.models import CodeLog, XPEvent
 
 load_dotenv()
 
