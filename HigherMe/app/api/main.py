@@ -27,6 +27,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Health check endpoint for Docker and Google Cloud Run
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for container orchestration platforms"""
+    return {"status": "healthy", "timestamp": datetime.now().isoformat()}
+
+@app.get("/")
+async def root():
+    """Root endpoint"""
+    return {"message": "HigherMe API is running", "status": "healthy"}
+
 def get_db():
     db = get_db_session()
     try:
