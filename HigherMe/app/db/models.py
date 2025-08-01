@@ -53,7 +53,8 @@ class MoodLog(Base):
     user_id = Column(Integer , ForeignKey('users.id') , nullable = False)
     mood_text = Column(String)
     sentiment = Column(Float)
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    summary = Column(String, nullable=True)  # For storing AI-generated summaries
+    timestamp = Column(DateTime, default=datetime.now())
     processed = Column(Boolean, default=False)
     processed_at = Column(DateTime, nullable=True)
     

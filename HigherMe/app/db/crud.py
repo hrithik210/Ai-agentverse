@@ -46,12 +46,13 @@ def create_health_log(db: Session, *, meals: str, sleep_hours: float, exercise_m
         return None
 
 
-def create_mood_log(db: Session, *, mood_text: str, sentiment: float, user_id: int):
+def create_mood_log(db: Session, *, mood_text: str, sentiment: float, user_id: int, summary: str = None):
     try:
         mood_log = MoodLog(
             user_id=user_id,
             mood_text=mood_text,
             sentiment=sentiment,
+            summary=summary,
             timestamp=datetime.now(),
             processed=False
         )
