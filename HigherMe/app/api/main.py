@@ -174,10 +174,13 @@ async def get_code_activity(current_user : User = Depends(get_current_user) , db
 @app.get("/api/v1/daily-report")
 async def get_daily_report(db : Session = Depends(get_db) , current_user  : User = Depends(get_current_user)):
     try:
+        print(f"🌅 Daily report requested for user: {current_user.id} ({current_user.username})")
         report = build_daily_report(db , current_user.id)
+        print(f"🌅 Daily report successfully generated for user {current_user.id}")
+        print(f"🌅 Report content: {report}")
         return {"report" : report}
     except Exception as e:
-        print(f"error occured : {e}")
+        print(f"🌅 Error occurred generating daily report for user {current_user.id}: {e}")
         raise HTTPException(status_code=500 , detail= str(e))
     
 @app.get("/api/v1/stats")

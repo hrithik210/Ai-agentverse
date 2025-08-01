@@ -37,6 +37,7 @@ def log_mood(mood_text: str , user_id : int):
     """
     Log a mood entry and immediately calculate and award XP.
     Each mood log now earns XP instantly like a real gaming system.
+    Returns a standardized response for frontend consumption.
     """
     db = get_db_session()
     try:
@@ -47,7 +48,8 @@ def log_mood(mood_text: str , user_id : int):
             db=db,
             mood_text=mood_text,
             sentiment=sentiment_score,
-            user_id= user_id
+            user_id= user_id,
+            summary=None  # Will be populated later during daily summary
         )
         
         if mood_log:
@@ -67,13 +69,27 @@ def log_mood(mood_text: str , user_id : int):
             db.commit()
             
             print(f"🎮 {xp_result['details']}")
-            return mood_log
+            
+            # Return standardized response for frontend
+            return {
+                "success": True,
+                "mood_log_id": mood_log.id,
+                "xp_awarded": xp_result["xp"],
+                "xp_details": xp_result["details"],
+                "sentiment_score": sentiment_score
+            }
         else:
             print("❌ Failed to log mood")
-            return None
+            return {
+                "success": False,
+                "error": "Failed to log mood"
+            }
     except Exception as e:
         print(f"Error logging mood: {e}")
-        return None
+        return {
+            "success": False,
+            "error": str(e)
+        }
     finally:
         db.close()
 

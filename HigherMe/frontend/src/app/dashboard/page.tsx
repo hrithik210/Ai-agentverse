@@ -211,18 +211,48 @@ const XPNotificationComponent = ({ notifications}: {
         {notifications.map((notification) => (
           <motion.div
             key={notification.id}
-            initial={{ opacity: 0, x: 100, scale: 0.8 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: 100, scale: 0.8 }}
-            className="bg-gradient-to-r from-amber-400 to-amber-600 text-black px-6 py-4 rounded-xl shadow-2xl border border-amber-300/50"
+            initial={{ opacity: 0, x: 100, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, x: 0, scale: 1, y: 0 }}
+            exit={{ opacity: 0, x: 100, scale: 0.9, y: 0 }}
+            transition={{
+              type: "spring",
+              stiffness: 300,
+              damping: 30
+            }}
+            className="bg-gradient-to-r from-amber-400 to-amber-600 text-black px-6 py-4 rounded-2xl shadow-2xl border border-amber-300/50 backdrop-blur-lg"
+            style={{
+              boxShadow: `
+                0 10px 30px -5px rgba(251, 191, 36, 0.3),
+                0 5px 15px -3px rgba(251, 191, 36, 0.2)
+              `
+            }}
           >
             <div className="flex items-center space-x-3">
-              <div className="bg-black/20 rounded-full p-1">
-                <Star className="w-5 h-5 text-black" />
-              </div>
-              <span className="font-bold text-lg">+{notification.amount} XP</span>
+              <motion.div 
+                className="bg-black/20 rounded-full p-2"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring" }}
+              >
+                <Star className="w-5 h-5 text-amber-100" />
+              </motion.div>
+              <motion.span 
+                className="font-bold text-xl"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+              >
+                +{notification.amount} XP
+              </motion.span>
             </div>
-            <div className="text-sm opacity-90 font-medium mt-1">{notification.message}</div>
+            <motion.div 
+              className="text-sm font-medium mt-2 text-amber-900"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              {notification.message}
+            </motion.div>
           </motion.div>
         ))}
       </AnimatePresence>
@@ -338,35 +368,66 @@ const LoggingModal = ({ isOpen, onClose, type, onSubmit }: LoggingModalProps) =>
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-6 z-50">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-lg flex items-center justify-center p-6 z-50">
       <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.9 }}
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        transition={{ type: "spring", duration: 0.5 }}
         className="w-full max-w-lg"
       >
-        <Card className="premium-card border-amber-500/30">
-          <CardHeader>
-            <CardTitle className="capitalize text-2xl text-gradient">Log {type}</CardTitle>
-            <CardDescription className="text-gray-400 text-lg">Add your {type} data and earn XP instantly!</CardDescription>
+        <Card className="premium-card border-amber-500/30 shadow-2xl">
+          <CardHeader className="space-y-2">
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <CardTitle className="capitalize text-2xl font-bold">
+                <span className="text-gradient">Log {type}</span>
+              </CardTitle>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <CardDescription className="text-gray-300 text-lg">
+                Track your progress and earn XP instantly!
+              </CardDescription>
+            </motion.div>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <motion.form 
+              onSubmit={handleSubmit} 
+              className="space-y-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+            >
               {renderForm()}
-              <div className="flex space-x-4 pt-6">
-                <Button type="submit" className="flex-1 premium-button text-black font-semibold text-lg py-3">
+              <motion.div 
+                className="flex space-x-4 pt-6"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+              >
+                <Button 
+                  type="submit" 
+                  className="flex-1 premium-button text-black font-semibold text-lg py-3 transition-all duration-300 ease-out hover:scale-105"
+                >
                   Save & Earn XP
                 </Button>
                 <Button 
                   type="button" 
                   variant="outline" 
                   onClick={onClose} 
-                  className="flex-1 border-amber-500/30 hover:border-amber-400/50 hover:bg-amber-500/10 text-amber-100 py-3"
+                  className="flex-1 border-amber-500/30 hover:border-amber-400/50 hover:bg-amber-500/10 text-amber-100 py-3 transition-all duration-300"
                 >
                   Cancel
                 </Button>
-              </div>
-            </form>
+              </motion.div>
+            </motion.form>
           </CardContent>
         </Card>
       </motion.div>
@@ -489,8 +550,8 @@ export default function Dashboard() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="premium-glass p-12 rounded-2xl border border-amber-500/30">
-          <div className="animate-pulse text-gradient text-xl font-semibold">Loading your progress...</div>
+        <div className="premium-glass p-8 rounded-xl border border-amber-500/30">
+          <div className="animate-pulse text-gradient text-lg font-semibold">Loading your progress...</div>
         </div>
       </div>
     );
@@ -498,94 +559,83 @@ export default function Dashboard() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen p-6">
+      <div className="min-h-screen p-4 md:p-6">
         <XPNotificationComponent notifications={xpNotifications} onDismiss={dismissNotification} />
-        
-        <div className="max-w-7xl mx-auto space-y-8">
-          {/* Header */}
+        <div className="max-w-5xl mx-auto space-y-6 md:space-y-8">
+          {/* Header - compact */}
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex justify-between items-center"
+            className="flex flex-col md:flex-row justify-between items-center gap-3 md:gap-6"
           >
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 premium-glass rounded-xl border border-amber-500/30">
-                  <User className="w-8 h-8 text-gradient" />
-                </div>
-                <h1 className="text-4xl font-bold text-gradient">Welcome back, {user?.username}!</h1>
+            <div className="flex items-center gap-3">
+              <div className="p-1.5 premium-glass rounded-lg border border-amber-500/20">
+                <User className="w-6 h-6 text-gradient" />
+              </div>
+              <div>
+                <span className="block text-lg md:text-xl text-gray-400">Welcome,</span>
+                <span className="block text-xl md:text-2xl font-semibold text-white truncate max-w-xs">{user?.username}</span>
               </div>
             </div>
-            
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={logout}
-              className="border-amber-500/30 hover:border-amber-400/50 hover:bg-amber-500/10 text-amber-100"
+              className="border-amber-500/20 hover:border-amber-400/40 hover:bg-amber-500/10 text-amber-100 px-3 py-1.5 text-sm md:text-base flex items-center"
             >
-              <LogOut className="w-4 h-4 mr-2" />
+              <LogOut className="w-4 h-4 mr-1" />
               Logout
             </Button>
           </motion.div>
 
-          {/* Level & XP Section */}
+          {/* Level & XP + Today's Stats - compact row */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <Card className="premium-card border-amber-500/20">
-              <CardContent className="p-8">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  <div className="text-center">
-                    <div className="level-badge text-2xl mb-3">
+            <Card className="premium-card border-amber-500/20 w-full mx-auto">
+              <CardContent className="p-3 md:p-4">
+                <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-stretch justify-between">
+                  {/* Level & XP */}
+                  <div className="flex-1 flex flex-col items-center justify-center text-center gap-2 border-b md:border-b-0 md:border-r border-amber-500/10 pb-4 md:pb-0 md:pr-6">
+                    <div className="level-badge text-base md:text-lg mb-1 px-3 py-1 font-semibold bg-gray-800/60 rounded-md border border-amber-500/20">
                       Level {stats?.current_level || 1}
                     </div>
-                    <div className="text-gray-400 text-lg">Current Level</div>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <div className="flex justify-between text-base">
-                      <span className="text-gray-400">XP Progress</span>
-                      <span className="text-gradient font-semibold">{currentLevelXp}/100</span>
-                    </div>
-                    <div className="w-full bg-gray-800/50 rounded-full h-6 border border-amber-500/20">
-                      <div 
-                        className="xp-bar h-6 rounded-full transition-all duration-700"
-                        style={{ width: `${xpProgress}%` }}
-                      />
+                    <div className="text-gray-400 text-xs font-medium">Current Level</div>
+                    <div className="flex flex-col items-center mt-1">
+                      <div className="text-lg font-bold text-gradient mb-0.5">
+                        {stats?.total_xp || 0}
+                      </div>
+                      <div className="text-gray-400 text-xs font-medium">Total XP</div>
                     </div>
                   </div>
-                  
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-gradient">
-                      {stats?.total_xp || 0}
+                  {/* XP Progress & Today's XP */}
+                  <div className="flex-1 flex flex-col items-center justify-center gap-3">
+                    <div className="w-full max-w-xs">
+                      <div className="flex justify-between text-xs font-medium mb-1">
+                        <span className="text-gray-400">XP Progress</span>
+                        <span className="text-gradient font-bold">{currentLevelXp}/100</span>
+                      </div>
+                      <div className="w-full bg-gray-800/50 rounded-full h-3 border border-amber-500/20 overflow-hidden">
+                        <div 
+                          className="xp-bar h-3 rounded-full transition-all duration-700 ease-out bg-amber-400/80"
+                          style={{ width: `${xpProgress}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="text-gray-400 text-lg">Total XP</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Today's Stats - Compact */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <Card className="premium-card border-amber-500/20">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="p-3 premium-glass rounded-xl border border-amber-500/30">
-                      <Zap className="w-7 h-7 text-gradient" />
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold text-gradient">{stats?.todays_xp || 0}</div>
-                      <div className="text-gray-400 text-lg">XP Today</div>
+                    <div className="flex items-center gap-3 mt-2">
+                      <div className="p-1 premium-glass rounded-lg border border-amber-500/30 flex items-center justify-center">
+                        <Zap className="w-4 h-4 text-gradient" />
+                      </div>
+                      <div className="flex flex-col items-center">
+                        <div className="text-base font-bold text-gradient leading-none">{stats?.todays_xp || 0}</div>
+                        <div className="text-gray-400 text-xs font-medium leading-none">XP Today</div>
+                      </div>
+                      <div className="p-1 premium-glass rounded-full border border-amber-500/30 ml-2 flex items-center justify-center">
+                        <TrendingUp className="w-4 h-4 text-amber-400/80" />
+                      </div>
                     </div>
                   </div>
-                  <TrendingUp className="w-6 h-6 text-amber-400/60" />
                 </div>
               </CardContent>
             </Card>
