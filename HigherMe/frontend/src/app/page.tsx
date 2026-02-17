@@ -244,7 +244,7 @@ export default function LandingPage() {
                 key={index}
                 className="feature-card lush-glass p-8 rounded-3xl lush-card-hover group relative overflow-hidden border border-white/5 hover:border-primary/50 transition-colors duration-500"
               >
-                <div className="absolute top-4 right-4 text-xs font-mono text-primary/60 border border-primary/20 px-2 py-1 rounded">
+                <div className="absolute top-4 right-4 text-xs font-mono text-primary/90 border border-primary/20 px-2 py-1 rounded">
                   {feature.stat}
                 </div>
                 <div className="mb-6 p-4 bg-primary/10 rounded-2xl w-fit text-primary ring-1 ring-primary/30 group-hover:bg-primary group-hover:text-black transition-colors duration-300">
@@ -301,8 +301,8 @@ export default function LandingPage() {
                                <Sword className="w-5 h-5" />
                             </div>
                             <div>
-                               <div className="text-sm text-muted-foreground font-mono uppercase">Active Players</div>
-                               <div className="text-2xl font-bold text-white">12,405</div>
+                               <div className="text-sm text-muted-foreground font-mono uppercase">Early Adopters</div>
+                               <div className="text-2xl font-bold text-white">100+</div>
                             </div>
                          </div>
                       </div>
@@ -313,15 +313,15 @@ export default function LandingPage() {
                                <Scroll className="w-5 h-5" />
                             </div>
                             <div>
-                               <div className="text-sm text-muted-foreground font-mono uppercase">Quests Completed</div>
-                               <div className="text-2xl font-bold text-white">843,921</div>
+                               <div className="text-sm text-muted-foreground font-mono uppercase">Focus Hours</div>
+                               <div className="text-2xl font-bold text-white">500+</div>
                             </div>
                          </div>
                       </div>
 
                       <div className="p-4 rounded-xl bg-gradient-to-r from-primary/20 to-transparent border border-primary/20">
-                          <div className="text-sm text-primary font-mono mb-1">CURRENT SEASON</div>
-                          <div className="text-xl font-bold text-white">Season 1: Awakening</div>
+                          <div className="text-sm text-primary font-mono mb-1">CURRENT STATUS</div>
+                          <div className="text-xl font-bold text-white">Open Beta v0.9</div>
                       </div>
                    </div>
                 </div>

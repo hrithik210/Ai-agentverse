@@ -67,7 +67,7 @@ export default function SignUpPage() {
                   placeholder="John Doe"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="bg-white/50 border-primary/20 focus:border-primary focus:ring-primary/20"
+                  className="bg-white/5 border-primary/20 focus:border-primary focus:ring-primary/20 text-white placeholder:text-muted-foreground"
                   required
                 />
               </div>
@@ -81,7 +81,7 @@ export default function SignUpPage() {
                   placeholder="name@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-white/50 border-primary/20 focus:border-primary focus:ring-primary/20"
+                  className="bg-white/5 border-primary/20 focus:border-primary focus:ring-primary/20 text-white placeholder:text-muted-foreground"
                   required
                 />
               </div>
@@ -94,7 +94,7 @@ export default function SignUpPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="bg-white/50 border-primary/20 focus:border-primary focus:ring-primary/20"
+                  className="bg-white/5 border-primary/20 focus:border-primary focus:ring-primary/20 text-white"
                   required
                 />
                 <p className="text-xs text-muted-foreground">
@@ -133,7 +133,7 @@ export default function SignUpPage() {
                 <span className="w-full border-t border-primary/10" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-muted-foreground font-medium">
+                <span className="bg-[#0C1F12] px-2 text-muted-foreground font-medium">
                   Or sign up with
                 </span>
               </div>
