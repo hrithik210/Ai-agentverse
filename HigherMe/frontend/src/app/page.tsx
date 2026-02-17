@@ -144,23 +144,7 @@ export default function LandingPage() {
         className="fixed top-0 left-0 w-full h-full pointer-events-none z-0"
       />
 
-    return () => {
-      ctx.revert();
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('resize', handleResize);
-      geometry.dispose();
-      material.dispose();
-      renderer.dispose();
-    };
-  }, []);
 
-  return (
-    <div className="min-h-screen bg-transparent text-foreground flex flex-col relative overflow-hidden font-sans selection:bg-primary/30 selection:text-primary-foreground">
-      {/* 3D Background Canvas */}
-      <canvas 
-        ref={canvasRef} 
-        className="fixed top-0 left-0 w-full h-full pointer-events-none z-0"
-      />
 
       {/* Header - Premium Grounded Look (Kept from V3 based on feedback) */}
       <header className="fixed top-0 w-full z-50 bg-[#050A06]/80 backdrop-blur-xl border-b border-white/5 supports-[backdrop-filter]:bg-[#050A06]/60">
@@ -345,41 +329,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Level Up Section (Social Proof) */}
-        <section className="container mx-auto px-4 py-24 pb-40">
-          <div className="max-w-5xl mx-auto bg-gradient-to-b from-[#0C1F12] to-black border border-primary/20 rounded-[2.5rem] p-12 text-center relative overflow-hidden shadow-[0_0_50px_rgba(74,222,128,0.1)]">
-            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10"></div>
-            
-            <div className="inline-block mb-6 animate-bounce">
-               <span className="text-6xl">🏆</span>
-            </div>
 
-            <h2 className="text-4xl lg:text-6xl font-black mb-12 relative z-10 text-white font-mono uppercase tracking-tighter">
-              Ready to <span className="text-primary">Min-Max</span> Your Life?
-            </h2>
-            
-            <div className="grid md:grid-cols-3 gap-12 text-center relative z-10 mb-12 border-t border-white/10 pt-12">
-              <div className="space-y-2">
-                <div className="text-5xl font-black font-mono text-primary">Lvl. 99</div>
-                <div className="text-white/40 uppercase tracking-widest text-xs font-bold">Max Cap</div>
-              </div>
-              <div className="space-y-2">
-                <div className="text-5xl font-black font-mono text-primary">100%</div>
-                <div className="text-white/40 uppercase tracking-widest text-xs font-bold">Quest Completion</div>
-              </div>
-              <div className="space-y-2">
-                <div className="text-5xl font-black font-mono text-primary">9000+</div>
-                <div className="text-white/40 uppercase tracking-widest text-xs font-bold">XP Gained</div>
-              </div>
-            </div>
-            
-            <Link href="/signup" className="relative z-10 inline-block group">
-              <Button size="lg" className="bg-primary text-black hover:bg-white hover:text-black rounded-xl px-16 h-20 text-2xl font-black shadow-[0_0_20px_rgba(74,222,128,0.5)] group-hover:shadow-[0_0_40px_rgba(255,255,255,0.5)] hover:scale-105 transition-all duration-300">
-                JOIN THE SERVER
-              </Button>
-            </Link>
-          </div>
-        </section>
       </main>
 
       {/* Footer */}
