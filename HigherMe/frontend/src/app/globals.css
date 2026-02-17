@@ -1,46 +1,47 @@
 @import "tailwindcss";
 
 :root {
-  /* Lush Forest Theme */
-  --primary: 136 41% 31%;
-  /* #2E6F40 - Forest Green */
-  --primary-foreground: 0 0% 100%;
+  /* Dark Lush Forest Theme */
+  --primary: 142 71% 45%;
+  /* #4ADE80 - Neon/Bioluminescent Green */
+  --primary-foreground: 145 80% 10%;
+  /* Dark Green/Black for contrast on neon */
 
-  --secondary: 136 38% 57%;
-  /* #68BA7F - Soft Green Accent */
-  --secondary-foreground: 138 24% 19%;
-  /* #253D2C */
+  --secondary: 145 60% 20%;
+  /* #14532D - Dark Foliage */
+  --secondary-foreground: 142 71% 90%;
+  /* Pale Green */
 
-  --accent: 136 70% 90%;
-  /* #CFFFDC - Minty Highlight/Surface */
-  --accent-foreground: 136 41% 31%;
+  --accent: 142 70% 50%;
+  /* #22C55E - Glowing Spore */
+  --accent-foreground: 145 80% 10%;
 
-  --background: 150 7% 98%;
-  /* #F8FAF9 - Mist/Off-white */
-  --foreground: 138 24% 19%;
-  /* #253D2C - Deep Green Text */
+  --background: 145 80% 5%;
+  /* #050A06 - Deepest Forest Night */
+  --foreground: 145 30% 90%;
+  /* #E2EFE5 - Pale Moonlight Text */
 
-  --card: 0 0% 100%;
-  /* Pure White */
-  --card-foreground: 138 24% 19%;
+  --card: 145 60% 8%;
+  /* #0C1F12 - Dark Glass */
+  --card-foreground: 145 30% 90%;
 
-  --muted: 150 10% 94%;
-  --muted-foreground: 138 15% 45%;
+  --muted: 145 40% 15%;
+  --muted-foreground: 145 20% 60%;
 
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 0 0% 100%;
 
-  --border: 136 30% 90%;
-  --input: 136 30% 90%;
-  --ring: 136 41% 31%;
-  /* Primary Green */
+  --border: 145 40% 15%;
+  --input: 145 40% 15%;
+  --ring: 142 71% 45%;
+  /* Primary Green Ring */
 
   --radius: 0.5rem;
   /* rounded-md/lg */
 
-  /* Lush Glass Effect Variables */
-  --glass-border: 136 41% 31% / 0.1;
-  --glass-bg: 136 41% 31% / 0.03;
+  /* Lush Glass Effect Variables (Dark) */
+  --glass-border: 142 71% 45% / 0.1;
+  --glass-bg: 145 60% 8% / 0.6;
 }
 
 body {
@@ -52,8 +53,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-image:
-    radial-gradient(at 0% 0%, hsla(136, 41%, 31%, 0.03) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, hsla(136, 38%, 57%, 0.05) 0px, transparent 50%);
+    radial-gradient(at 20% 20%, hsla(142, 71%, 45%, 0.05) 0px, transparent 40%),
+    radial-gradient(at 80% 80%, hsla(142, 71%, 45%, 0.05) 0px, transparent 40%);
   background-attachment: fixed;
 }
 
@@ -76,19 +77,21 @@ pre,
 }
 
 ::selection {
-  background: hsl(var(--secondary) / 0.3);
-  color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.3);
+  color: hsl(var(--primary-foreground));
 }
 
-/* Lush Glass Utility */
+/* Lush Glass Utility (Dark) */
 .lush-glass {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(12, 31, 18, 0.6);
+  /* Dark semi-transparent */
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(46, 111, 64, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  /* Subtle white border */
   box-shadow:
-    0 4px 6px -1px rgba(46, 111, 64, 0.05),
-    0 2px 4px -1px rgba(46, 111, 64, 0.03);
+    0 4px 6px -1px rgba(0, 0, 0, 0.3),
+    0 2px 4px -1px rgba(0, 0, 0, 0.1);
 }
 
 .lush-card-hover {
@@ -98,9 +101,11 @@ pre,
 .lush-card-hover:hover {
   transform: translateY(-2px);
   box-shadow:
-    0 10px 15px -3px rgba(46, 111, 64, 0.1),
-    0 4px 6px -2px rgba(46, 111, 64, 0.05);
-  border-color: rgba(46, 111, 64, 0.2);
+    0 10px 15px -3px rgba(74, 222, 128, 0.1),
+    /* Green glow */
+    0 4px 6px -2px rgba(0, 0, 0, 0.2);
+  border-color: rgba(74, 222, 128, 0.3);
+  /* Green border on hover */
 }
 
 /* Scrollbar */

@@ -13,7 +13,7 @@ const buttonVariants = cva(
         secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-sm',
         ghost: 'hover:bg-accent hover:text-accent-foreground',
         link: 'text-primary underline-offset-4 hover:underline',
-        lush: 'bg-gradient-to-r from-primary to-[#3A8D50] text-white shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-300',
+        lush: 'bg-gradient-to-r from-primary to-[#22C55E] text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-300',
       },
       size: {
         default: 'h-10 px-5 py-2.5',
