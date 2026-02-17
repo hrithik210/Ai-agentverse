@@ -1,92 +1,122 @@
 @import "tailwindcss";
 
 :root {
-  /* Premium Light Theme */
-  --background: 0 0% 100%;
-  --foreground: 222 47% 11%;
+  /* Lush Forest Theme */
+  --primary: 136 41% 31%;
+  /* #2E6F40 - Forest Green */
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 136 38% 57%;
+  /* #68BA7F - Soft Green Accent */
+  --secondary-foreground: 138 24% 19%;
+  /* #253D2C */
+
+  --accent: 136 70% 90%;
+  /* #CFFFDC - Minty Highlight/Surface */
+  --accent-foreground: 136 41% 31%;
+
+  --background: 150 7% 98%;
+  /* #F8FAF9 - Mist/Off-white */
+  --foreground: 138 24% 19%;
+  /* #253D2C - Deep Green Text */
 
   --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
+  /* Pure White */
+  --card-foreground: 138 24% 19%;
 
-  --primary: 221 83% 53%;
-  /* Vivid Blue */
-  --primary-foreground: 210 40% 98%;
-
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222 47% 11.2%;
-
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222 47% 11.2%;
+  --muted: 150 10% 94%;
+  --muted-foreground: 138 15% 45%;
 
   --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
+  --destructive-foreground: 0 0% 100%;
 
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 221 83% 53%;
+  --border: 136 30% 90%;
+  --input: 136 30% 90%;
+  --ring: 136 41% 31%;
+  /* Primary Green */
 
   --radius: 0.5rem;
+  /* rounded-md/lg */
+
+  /* Lush Glass Effect Variables */
+  --glass-border: 136 41% 31% / 0.1;
+  --glass-bg: 136 41% 31% / 0.03;
 }
 
 body {
   background: hsl(var(--background));
   color: hsl(var(--foreground));
-  font-family: var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   min-height: 100vh;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-image:
+    radial-gradient(at 0% 0%, hsla(136, 41%, 31%, 0.03) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(136, 38%, 57%, 0.05) 0px, transparent 50%);
+  background-attachment: fixed;
 }
 
-::selection {
-  background: hsl(var(--primary) / 0.1);
-  color: hsl(var(--primary));
-}
-
-/* Premium Card Styles */
-.premium-card {
-  background: hsl(var(--card));
-  border: 1px solid hsl(var(--border));
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-  transition: box-shadow 0.2s ease-in-out;
-}
-
-.premium-card:hover {
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-}
-
-/* Premium Button Styles */
-.premium-button {
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-}
-
-.premium-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-}
-
-.premium-button:active {
-  transform: translateY(0);
-}
-
-/* Typography Enhancements */
 h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
+  font-family: 'Inter', system-ui, sans-serif;
   letter-spacing: -0.02em;
   font-weight: 600;
   color: hsl(var(--foreground));
 }
 
-p {
-  color: hsl(var(--muted-foreground));
+code,
+pre,
+.font-mono {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+::selection {
+  background: hsl(var(--secondary) / 0.3);
+  color: hsl(var(--primary));
+}
+
+/* Lush Glass Utility */
+.lush-glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(46, 111, 64, 0.1);
+  box-shadow:
+    0 4px 6px -1px rgba(46, 111, 64, 0.05),
+    0 2px 4px -1px rgba(46, 111, 64, 0.03);
+}
+
+.lush-card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.lush-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 10px 15px -3px rgba(46, 111, 64, 0.1),
+    0 4px 6px -2px rgba(46, 111, 64, 0.05);
+  border-color: rgba(46, 111, 64, 0.2);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--secondary) / 0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--secondary));
 }

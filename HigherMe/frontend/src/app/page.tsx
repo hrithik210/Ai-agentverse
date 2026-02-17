@@ -1,42 +1,154 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
-import { ArrowRight, Zap, Target, Code, CheckCircle, BarChart3, Shield } from 'lucide-react';
-
-const fadeIn = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.5 }
-};
-
-const staggerContainer = {
-  animate: {
-    transition: {
-      staggerChildren: 0.1
-    }
-  }
-};
+import { ArrowRight, Zap, Target, Code, BarChart3, Leaf, Wind } from 'lucide-react';
+import gsap from 'gsap';
+import * as THREE from 'three';
 
 export default function LandingPage() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const heroRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // GSAP Animations
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+      
+      tl.from(".hero-text", {
+        y: 100,
+        opacity: 0,
+        duration: 1,
+        stagger: 0.2
+      })
+      .from(".hero-btn", {
+        y: 20,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.1
+      }, "-=0.5")
+      .from(".feature-card", {
+        y: 50,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.1
+      }, "-=0.5");
+    }, heroRef);
+
+    // Three.js Background
+    if (!canvasRef.current) return;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ 
+      canvas: canvasRef.current, 
+      alpha: true,
+      antialias: true 
+    });
+
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    // Create Organic Particles (Leaves/Orbs)
+    const geometry = new THREE.IcosahedronGeometry(0.5, 0);
+    const material = new THREE.MeshBasicMaterial({ 
+      color: 0x68BA7F,
+      transparent: true,
+      opacity: 0.3,
+      wireframe: true
+    });
+
+    const particles: THREE.Mesh[] = [];
+    for (let i = 0; i < 50; i++) {
+      const particle = new THREE.Mesh(geometry, material);
+      particle.position.set(
+        (Math.random() - 0.5) * 20,
+        (Math.random() - 0.5) * 20,
+        (Math.random() - 0.5) * 20
+      );
+      scene.add(particle);
+      particles.push(particle);
+    }
+
+    camera.position.z = 10;
+
+    // Mouse Interaction
+    let mouseX = 0;
+    let mouseY = 0;
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+      mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+
+    // Animation Loop
+    const animate = () => {
+      requestAnimationFrame(animate);
+
+      particles.forEach((particle, i) => {
+        particle.rotation.x += 0.002;
+        particle.rotation.y += 0.003;
+        
+        // Float effect
+        particle.position.y += Math.sin(Date.now() * 0.001 + i) * 0.01;
+        
+        // Mouse influence
+        particle.position.x += (mouseX * 0.5 - particle.position.x) * 0.02;
+        particle.position.y += (mouseY * 0.5 - particle.position.y) * 0.02;
+      });
+
+      renderer.render(scene, camera);
+    };
+
+    animate();
+
+    const handleResize = () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      ctx.revert();
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('resize', handleResize);
+      // Cleanup Three.js
+      particles.forEach(p => {
+        p.geometry.dispose();
+        (p.material as THREE.Material).dispose();
+      });
+      renderer.dispose();
+    };
+  }, []);
+
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
+    <div className="min-h-screen bg-transparent text-foreground flex flex-col relative overflow-hidden">
+      {/* 3D Background Canvas */}
+      <canvas 
+        ref={canvasRef} 
+        className="fixed top-0 left-0 w-full h-full pointer-events-none z-0"
+      />
+
       {/* Header */}
-      <header className="fixed top-0 w-full bg-background/80 backdrop-blur-md z-50 border-b border-border/40">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+      <header className="fixed top-0 w-full lush-glass z-50">
+        <div className="container mx-auto px-4 h-20 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <Zap className="w-6 h-6 text-primary" />
-            <span className="font-bold text-xl tracking-tight">HigherMe</span>
+            <Leaf className="w-8 h-8 text-primary" />
+            <span className="font-bold text-2xl tracking-tight text-primary">HigherMe</span>
           </div>
           <div className="flex items-center space-x-4">
             <Link href="/signin">
-              <Button variant="ghost" className="text-sm font-medium">
+              <Button variant="ghost" className="text-sm font-medium hover:text-primary">
                 Sign In
               </Button>
             </Link>
             <Link href="/signup">
-              <Button className="premium-button text-sm">
+              <Button variant="lush" className="text-sm font-medium">
                 Get Started
               </Button>
             </Link>
@@ -44,121 +156,108 @@ export default function LandingPage() {
         </div>
       </header>
 
-      <main className="flex-1 pt-24">
+      <main className="flex-1 pt-24 relative z-10" ref={heroRef}>
         {/* Hero Section */}
-        <section className="container mx-auto px-4 py-20 lg:py-32 text-center">
-          <motion.div
-            initial="initial"
-            animate="animate"
-            variants={staggerContainer}
-            className="max-w-4xl mx-auto space-y-8"
-          >
-            <motion.div variants={fadeIn}>
-              <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-6">
-                v2.0 Now Available
+        <section className="container mx-auto px-4 py-24 lg:py-32 text-center">
+          <div className="max-w-5xl mx-auto space-y-8">
+            <div className="hero-text inline-block px-4 py-1.5 rounded-full bg-secondary/20 text-primary text-sm font-semibold border border-secondary/30 backdrop-blur-sm">
+              <span className="flex items-center gap-2">
+                <Wind className="w-4 h-4" />
+                Waitlist 2.0 Open
               </span>
-              <h1 className="text-5xl lg:text-7xl font-bold tracking-tight text-foreground leading-[1.1]">
-                Level up your life with <span className="text-primary">precision</span>
-              </h1>
-            </motion.div>
+            </div>
             
-            <motion.p 
-              variants={fadeIn}
-              className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed"
-            >
-              The ultimate solo leveling system for developers. Track your mood, optimize your health, and accelerate your coding progress with data-driven insights.
-            </motion.p>
+            <h1 className="hero-text text-6xl lg:text-8xl font-bold tracking-tight text-primary leading-[1.1]">
+              Cultivate Your <br/>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#2E6F40] to-[#68BA7F]">
+                Potential
+              </span>
+            </h1>
             
-            <motion.div 
-              variants={fadeIn}
-              className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4"
-            >
-              <Link href="/signup">
-                <Button size="lg" className="premium-button h-12 px-8 text-base">
-                  Start Leveling Up
-                  <ArrowRight className="ml-2 w-4 h-4" />
+            <p className="hero-text text-xl lg:text-2xl text-muted-foreground/80 max-w-2xl mx-auto leading-relaxed font-light">
+              The organic AI ecosystem for personal growth. Monitor your mental state, health, and code with precision.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-8">
+              <Link href="/signup" className="hero-btn">
+                <Button variant="lush" size="lg" className="rounded-full px-10 h-14 text-lg">
+                  Start Growing
+                  <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
-              <Link href="#features">
-                <Button variant="outline" size="lg" className="h-12 px-8 text-base bg-background/50 hover:bg-muted/50">
-                  View Features
+              <Link href="#features" className="hero-btn">
+                <Button variant="outline" size="lg" className="rounded-full px-10 h-14 text-lg border-primary/30 hover:bg-primary/5">
+                  Explore Ecosystem
                 </Button>
               </Link>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         </section>
 
         {/* Features Grid */}
-        <section id="features" className="container mx-auto px-4 py-24 bg-muted/30">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl font-bold tracking-tight mb-4">Everything you need to grow</h2>
-            <p className="text-muted-foreground text-lg">
-              A complete system designed to help you become the best version of yourself.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <section id="features" className="container mx-auto px-4 py-32">
+          <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
             {[
               {
-                icon: <Target className="w-10 h-10 text-blue-500" />,
+                icon: <Target className="w-10 h-10 text-primary" />,
                 title: "Mood Tracking",
-                description: "Monitor your mental state with daily check-ins and identify patterns that affect your productivity."
+                description: "Daily check-ins to monitor your mental ecosystem."
               },
               {
-                icon: <BarChart3 className="w-10 h-10 text-indigo-500" />,
+                icon: <BarChart3 className="w-10 h-10 text-primary" />,
                 title: "Health Logging",
-                description: "Keep track of your meals, exercise, and sleep to ensure your physical engine is running at peak performance."
+                description: "Optimize your physical engine for peak performance."
               },
               {
-                icon: <Code className="w-10 h-10 text-violet-500" />,
+                icon: <Code className="w-10 h-10 text-primary" />,
                 title: "Code Progress",
-                description: "Visualize your coding activity and Github contributions to maintain your streak and momentum."
+                description: "Visualize your contribution graph like a growing forest."
               }
             ].map((feature, index) => (
-              <motion.div
+              <div
                 key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className="bg-card p-8 rounded-2xl shadow-sm border border-border/50 hover:shadow-md transition-all duration-300"
+                className="feature-card lush-glass p-8 rounded-3xl lush-card-hover group relative overflow-hidden"
               >
-                <div className="mb-6 p-4 bg-primary/5 rounded-xl w-fit">
+                <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500">
                   {feature.icon}
                 </div>
-                <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
+                <div className="mb-6 p-4 bg-secondary/20 rounded-2xl w-fit text-primary">
+                  {feature.icon}
+                </div>
+                <h3 className="text-2xl font-bold mb-3 text-primary">{feature.title}</h3>
                 <p className="text-muted-foreground leading-relaxed">
                   {feature.description}
                 </p>
-              </motion.div>
+              </div>
             ))}
           </div>
         </section>
 
-        {/* Social Proof / Trust */}
-        <section className="container mx-auto px-4 py-24">
-          <div className="max-w-5xl mx-auto bg-primary text-primary-foreground rounded-3xl p-12 text-center relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-full bg-[linear-gradient(45deg,rgba(255,255,255,0.1)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.1)_50%,rgba(255,255,255,0.1)_75%,transparent_75%,transparent)] bg-[length:64px_64px] opacity-10"></div>
+        {/* Social Proof */}
+        <section className="container mx-auto px-4 py-24 pb-40">
+          <div className="max-w-5xl mx-auto bg-gradient-to-br from-primary to-[#1a4a2a] text-white rounded-[2.5rem] p-12 text-center relative overflow-hidden shadow-2xl">
+            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
             
-            <h2 className="text-3xl lg:text-4xl font-bold mb-8 relative z-10">Ready to start your journey?</h2>
-            <div className="grid md:grid-cols-3 gap-8 text-center relative z-10 mb-10">
+            <h2 className="text-4xl lg:text-5xl font-bold mb-12 relative z-10">Thrive in the Digital Age</h2>
+            
+            <div className="grid md:grid-cols-3 gap-12 text-center relative z-10 mb-12 border-t border-white/10 pt-12">
               <div className="space-y-2">
-                <div className="text-4xl font-bold">100%</div>
-                <div className="text-primary-foreground/80">Focus</div>
+                <div className="text-5xl font-bold font-mono">100%</div>
+                <div className="text-white/60 uppercase tracking-widest text-sm">Organic Growth</div>
               </div>
               <div className="space-y-2">
-                <div className="text-4xl font-bold">24/7</div>
-                <div className="text-primary-foreground/80">Uptime</div>
+                <div className="text-5xl font-bold font-mono">24/7</div>
+                <div className="text-white/60 uppercase tracking-widest text-sm">System Uptime</div>
               </div>
               <div className="space-y-2">
-                <div className="text-4xl font-bold">Level 99</div>
-                <div className="text-primary-foreground/80">Potential</div>
+                <div className="text-5xl font-bold font-mono">Lvl.99</div>
+                <div className="text-white/60 uppercase tracking-widest text-sm">Max Potential</div>
               </div>
             </div>
             
-            <Link href="/signup">
-              <Button size="lg" variant="secondary" className="px-8 h-12 text-primary font-bold shadow-lg hover:shadow-xl transition-all">
-                Join Now Free
+            <Link href="/signup" className="relative z-10 inline-block">
+              <Button size="lg" className="bg-[#CFFFDC] text-primary hover:bg-white rounded-full px-12 h-16 text-lg font-bold shadow-xl hover:scale-105 transition-all duration-300">
+                Join the Ecosystem
               </Button>
             </Link>
           </div>
@@ -166,43 +265,15 @@ export default function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border/40 py-12 bg-muted/20">
-        <div className="container mx-auto px-4 grid md:grid-cols-4 gap-8">
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <Zap className="w-5 h-5 text-primary" />
-              <span className="font-bold text-lg">HigherMe</span>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Empowering developers to achieve their peak potential through data-driven self-improvement.
-            </p>
+      <footer className="border-t border-primary/10 py-12 bg-white/50 backdrop-blur-sm relative z-10">
+        <div className="container mx-auto px-4 text-center">
+          <div className="flex items-center justify-center space-x-2 mb-4">
+            <Leaf className="w-6 h-6 text-primary" />
+            <span className="font-bold text-xl text-primary">HigherMe</span>
           </div>
-          <div>
-            <h4 className="font-bold mb-4">Product</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="#" className="hover:text-primary">Features</Link></li>
-              <li><Link href="#" className="hover:text-primary">Pricing</Link></li>
-              <li><Link href="#" className="hover:text-primary">Changelog</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-bold mb-4">Company</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="#" className="hover:text-primary">About</Link></li>
-              <li><Link href="#" className="hover:text-primary">Blog</Link></li>
-              <li><Link href="#" className="hover:text-primary">Careers</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-bold mb-4">Legal</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="#" className="hover:text-primary">Privacy</Link></li>
-              <li><Link href="#" className="hover:text-primary">Terms</Link></li>
-            </ul>
-          </div>
-        </div>
-        <div className="container mx-auto px-4 mt-12 pt-8 border-t border-border/40 text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} HigherMe. All rights reserved.
+          <p className="text-sm text-muted-foreground">
+            © {new Date().getFullYear()} HigherMe Ecosystem. Cultivated with precision.
+          </p>
         </div>
       </footer>
     </div>
