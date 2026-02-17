@@ -1,149 +1,92 @@
 @import "tailwindcss";
 
 :root {
-  --background: 220 16% 10%;
-  --foreground: 220 15% 92%;
-  --card: 220 16% 13%;
-  --card-foreground: 220 15% 92%;
-  --primary: 210 10% 30%;
-  --primary-foreground: 220 15% 92%;
-  --secondary: 210 10% 20%;
-  --secondary-foreground: 220 15% 92%;
-  --muted: 220 10% 18%;
-  --muted-foreground: 220 10% 60%;
-  --accent: 200 80% 55%;
-  --accent-foreground: 220 15% 92%;
-  --border: 220 10% 18%;
-  --input: 220 10% 18%;
+  /* Premium Light Theme */
+  --background: 0 0% 100%;
+  --foreground: 222 47% 11%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+
+  --primary: 221 83% 53%;
+  /* Vivid Blue */
+  --primary-foreground: 210 40% 98%;
+
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222 47% 11.2%;
+
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+
+  --accent: 210 40% 96.1%;
+  --accent-foreground: 222 47% 11.2%;
+
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 221 83% 53%;
+
   --radius: 0.5rem;
 }
 
 body {
   background: hsl(var(--background));
   color: hsl(var(--foreground));
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   min-height: 100vh;
-  background-attachment: fixed;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
 }
 
-/* Reduced eye strain text selection */
 ::selection {
-  background: hsl(var(--accent) / 0.15);
-  color: hsl(var(--foreground));
+  background: hsl(var(--primary) / 0.1);
+  color: hsl(var(--primary));
 }
 
-/* Custom scrollbar - more subtle and comfortable */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: hsl(var(--background));
-  border-radius: 6px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted));
-  border-radius: 6px;
-  border: 2px solid hsl(var(--background));
-  transition: all 0.2s ease;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--primary));
-}
-
-/* Minimal card and glass styles */
-.premium-card, .premium-glass, .glass-effect {
+/* Premium Card Styles */
+.premium-card {
   background: hsl(var(--card));
   border: 1px solid hsl(var(--border));
-  border-radius: var(--radius);
-  box-shadow: 0 2px 8px 0 hsl(var(--background) / 0.2);
-  backdrop-filter: blur(8px);
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  transition: box-shadow 0.2s ease-in-out;
 }
 
-.premium-card {
-  padding: 1.25rem 1.5rem;
+.premium-card:hover {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
 
-.premium-glass {
-  padding: 1.25rem 1.5rem;
-}
-
-/* Remove glow and neon effects */
-.glow-effect, .neon-border {
-  box-shadow: none !important;
-  border: 1px solid hsl(var(--border));
-}
-
-.level-badge {
-  background: hsl(var(--primary));
-  color: hsl(var(--foreground));
-  border-radius: 0.75rem;
-  font-size: 1rem;
-  font-weight: 600;
-  padding: 0.5rem 1rem;
-  box-shadow: none;
-  text-shadow: none;
-}
-
-.xp-bar {
-  background: hsl(var(--accent));
-  border-radius: 0.5rem;
-  box-shadow: none;
-  transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Remove text gradient effect */
-.text-gradient {
-  background: none !important;
-  -webkit-background-clip: unset !important;
-  -webkit-text-fill-color: unset !important;
-  background-clip: unset !important;
-  text-fill-color: unset !important;
-  color: hsl(var(--foreground));
-}
-
-/* Redefine premium button styles */
+/* Premium Button Styles */
 .premium-button {
-  background: hsl(var(--primary));
-  color: hsl(var(--foreground));
-  border-radius: 0.5rem;
-  font-weight: 600;
-  box-shadow: none;
-  text-shadow: none;
-  transition: background 0.2s;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 }
 
 .premium-button:hover {
-  background: hsl(var(--accent));
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.premium-button:active {
+  transform: translateY(0);
+}
+
+/* Typography Enhancements */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  letter-spacing: -0.02em;
+  font-weight: 600;
   color: hsl(var(--foreground));
 }
 
-/* Compact modal and card paddings */
-.Card, .CardContent, .CardHeader {
-  padding: 1rem !important;
+p {
+  color: hsl(var(--muted-foreground));
 }
-
-/* Reduce modal overlay darkness for comfort */
-[role="dialog"], .modal, .fixed.inset-0 {
-  background: hsl(var(--background) / 0.85) !important;
-  backdrop-filter: blur(6px) !important;
-}
-
-/* Reduce border-radius and padding for all inputs/buttons */
-input, button, .Input, .Button {
-  border-radius: 0.5rem !important;
-  padding: 0.5rem 1rem !important;
-  font-size: 1rem !important;
-}
-
-/* Remove all keyframe/animation definitions for minimalism */
-@keyframes fadeIn {}
-@keyframes shimmer {}
-@keyframes pulseGlow {}
-@keyframes pulse-gold {}
