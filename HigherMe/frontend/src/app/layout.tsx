@@ -14,8 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "HigherMe - Solo Leveling System",
-  description: "Level up your life with mood tracking, health logging, and coding progress monitoring",
+  title: "HigherMe | Solo Leveling for Real Life",
+  description:
+    "Track mood, health, and coding progress in one system, then get an AI daily verdict to level up with intention.",
 };
 
 export default function RootLayout({
