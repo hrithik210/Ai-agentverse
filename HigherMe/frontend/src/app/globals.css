@@ -108,6 +108,66 @@ pre,
   /* Green border on hover */
 }
 
+.hero-video-shell {
+  box-shadow:
+    0 28px 90px -45px rgba(0, 0, 0, 0.95),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.hero-video-noise {
+  background-image:
+    linear-gradient(0deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
+    repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255, 255, 255, 0.03) 3px);
+  opacity: 0.2;
+  animation: hero-noise 1.4s steps(2, end) infinite;
+}
+
+.hero-video-vignette {
+  background: radial-gradient(circle at center, transparent 35%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+.hero-scanline {
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(74, 222, 128, 0.18) 42%,
+    rgba(74, 222, 128, 0.06) 58%,
+    transparent 100%
+  );
+  opacity: 0.7;
+  filter: blur(14px);
+}
+
+.hero-data-track {
+  background-image:
+    linear-gradient(90deg, rgba(74, 222, 128, 0.25), rgba(134, 239, 172, 0.55), rgba(74, 222, 128, 0.25)),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.22) 0 2px, transparent 2px 14px);
+}
+
+@keyframes hero-noise {
+  0% {
+    opacity: 0.13;
+  }
+
+  50% {
+    opacity: 0.24;
+  }
+
+  100% {
+    opacity: 0.13;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-video-noise,
+  .hero-scanline,
+  .hero-pulse-ring,
+  .hero-orb {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

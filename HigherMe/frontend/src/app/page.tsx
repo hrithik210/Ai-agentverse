@@ -50,6 +50,7 @@ const verdictSignals = [
 
 export default function LandingPage() {
   const pageRef = useRef<HTMLDivElement>(null);
+  const heroMediaRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -92,6 +93,16 @@ export default function LandingPage() {
           '-=0.35'
         )
         .from(
+          '.hero-media-chip',
+          {
+            y: 18,
+            opacity: 0,
+            duration: 0.45,
+            stagger: 0.07,
+          },
+          '-=0.4'
+        )
+        .from(
           '.reveal-card',
           {
             y: 26,
@@ -111,6 +122,41 @@ export default function LandingPage() {
           },
           '-=0.2'
         );
+
+      gsap.to(heroMediaRef.current, {
+        y: -8,
+        duration: 2.8,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut',
+      });
+      gsap.to('.hero-scanline', {
+        yPercent: 65,
+        duration: 3.8,
+        repeat: -1,
+        ease: 'none',
+      });
+      gsap.to('.hero-data-track', {
+        xPercent: -48,
+        duration: 5.4,
+        repeat: -1,
+        ease: 'none',
+      });
+      gsap.to('.hero-pulse-ring', {
+        scale: 1.12,
+        opacity: 0.35,
+        duration: 1.6,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut',
+      });
+      gsap.to('.hero-orb', {
+        scale: 1.08,
+        duration: 1.6,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut',
+      });
     }, pageRef);
 
     return () => ctx.revert();
@@ -213,9 +259,18 @@ export default function LandingPage() {
             </div>
 
             <div className="hero-media-shell order-2">
-              <article className="relative overflow-hidden rounded-[1.8rem] border border-white/10 bg-[linear-gradient(160deg,rgba(12,31,18,0.95)_0%,rgba(8,17,12,0.92)_50%,rgba(7,15,11,0.98)_100%)] p-3 shadow-[0_24px_100px_-35px_rgba(0,0,0,0.9)]">
-                <div className="relative overflow-hidden rounded-[1.25rem] border border-white/10 bg-black/30 p-5 sm:p-6">
-                  <div className="mb-5 flex items-center justify-between">
+              <article
+                ref={heroMediaRef}
+                className="hero-video-shell relative overflow-hidden rounded-[1.8rem] border border-white/10 bg-[linear-gradient(160deg,rgba(12,31,18,0.95)_0%,rgba(8,17,12,0.92)_50%,rgba(7,15,11,0.98)_100%)] p-3 shadow-[0_24px_100px_-35px_rgba(0,0,0,0.9)]"
+              >
+                <div className="relative overflow-hidden rounded-[1.25rem] border border-white/10 bg-black/40 p-5 sm:p-6">
+                  <div className="hero-video-noise pointer-events-none absolute inset-0" />
+                  <div className="hero-video-vignette pointer-events-none absolute inset-0" />
+                  <div className="hero-scanline pointer-events-none absolute inset-x-0 -top-[58%] h-[175%]" />
+                  <div className="hero-pulse-ring pointer-events-none absolute left-1/2 top-[54%] h-44 w-44 -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/35 opacity-20" />
+                  <div className="hero-orb pointer-events-none absolute left-1/2 top-[54%] h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/80 shadow-[0_0_22px_rgba(74,222,128,0.8)]" />
+
+                  <div className="relative z-10 mb-5 flex items-center justify-between">
                     <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1 text-[11px] font-mono uppercase tracking-[0.12em] text-emerald-300">
                       <span className="h-2 w-2 rounded-full bg-emerald-300" />
                       Live Session
@@ -223,8 +278,8 @@ export default function LandingPage() {
                     <div className="text-xs font-mono text-white/60">Today 21:14</div>
                   </div>
 
-                  <div className="grid gap-3">
-                    <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                  <div className="relative z-10 grid gap-3">
+                    <div className="hero-media-chip rounded-xl border border-white/10 bg-white/5 p-3">
                       <div className="mb-2 flex items-center justify-between text-[11px] font-mono uppercase tracking-[0.12em] text-white/55">
                         <span>Current Level</span>
                         <span>Lv 07</span>
@@ -235,19 +290,23 @@ export default function LandingPage() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                      <div className="hero-media-chip rounded-xl border border-white/10 bg-white/5 p-3">
                         <div className="text-[10px] font-mono uppercase tracking-[0.12em] text-white/55">Hydration</div>
                         <div className="mt-1 text-lg font-bold text-white">78%</div>
                       </div>
-                      <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                      <div className="hero-media-chip rounded-xl border border-white/10 bg-white/5 p-3">
                         <div className="text-[10px] font-mono uppercase tracking-[0.12em] text-white/55">Mood</div>
                         <div className="mt-1 text-lg font-bold text-white">Stable</div>
                       </div>
                     </div>
 
-                    <div className="rounded-xl border border-primary/20 bg-gradient-to-r from-primary/20 to-transparent p-3">
+                    <div className="hero-media-chip rounded-xl border border-primary/20 bg-gradient-to-r from-primary/20 to-transparent p-3">
                       <div className="text-[10px] font-mono uppercase tracking-[0.12em] text-primary">AI Verdict</div>
                       <div className="mt-1 text-sm font-semibold text-white">Good consistency. Increase deep work block tomorrow.</div>
+                    </div>
+
+                    <div className="hero-media-chip overflow-hidden rounded-xl border border-white/10 bg-black/40">
+                      <div className="hero-data-track h-8 w-[190%]" />
                     </div>
                   </div>
                 </div>
