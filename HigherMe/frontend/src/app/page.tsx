@@ -3,19 +3,8 @@
 import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
-import {
-  ArrowRight,
-  Code,
-  Flame,
-  Leaf,
-  Scroll,
-  Shield,
-  Sword,
-  Target,
-  Zap,
-} from 'lucide-react';
+import { ArrowRight, Code, Flame, Leaf, Scroll, Shield, Sword, Target, Zap } from 'lucide-react';
 import gsap from 'gsap';
-import * as THREE from 'three';
 
 const corePillars = [
   {
@@ -60,7 +49,6 @@ const verdictSignals = [
 ];
 
 export default function LandingPage() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const pageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -68,35 +56,45 @@ export default function LandingPage() {
 
     const ctx = gsap.context(() => {
       if (prefersReducedMotion) {
-        gsap.set('.hero-item, .hero-action, .reveal-card, .verdict-item', {
+        gsap.set('.hero-copy-item, .hero-cta, .hero-media-shell, .reveal-card, .verdict-item', {
           opacity: 1,
           y: 0,
+          x: 0,
           scale: 1,
         });
         return;
       }
 
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-      tl.from('.hero-item', {
+      tl.from('.hero-copy-item', {
         y: 24,
         opacity: 0,
-        duration: 0.8,
-        stagger: 0.1,
+        duration: 0.75,
+        stagger: 0.09,
       })
         .from(
-          '.hero-action',
+          '.hero-cta',
           {
             y: 16,
             opacity: 0,
-            duration: 0.55,
+            duration: 0.5,
             stagger: 0.08,
           },
-          '-=0.4'
+          '-=0.35'
+        )
+        .from(
+          '.hero-media-shell',
+          {
+            x: 22,
+            opacity: 0,
+            duration: 0.7,
+          },
+          '-=0.35'
         )
         .from(
           '.reveal-card',
           {
-            y: 30,
+            y: 26,
             opacity: 0,
             duration: 0.6,
             stagger: 0.08,
@@ -106,117 +104,26 @@ export default function LandingPage() {
         .from(
           '.verdict-item',
           {
-            x: 20,
+            x: 18,
             opacity: 0,
             duration: 0.5,
-            stagger: 0.07,
+            stagger: 0.06,
           },
           '-=0.2'
         );
     }, pageRef);
 
-    if (!canvasRef.current || prefersReducedMotion) {
-      return () => ctx.revert();
-    }
-
-    const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x050a06, 0.045);
-
-    const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 10;
-
-    const renderer = new THREE.WebGLRenderer({
-      canvas: canvasRef.current,
-      alpha: true,
-      antialias: true,
-    });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-
-    const geometry = new THREE.BufferGeometry();
-    const count = 130;
-    const positions = new Float32Array(count * 3);
-    const colors = new Float32Array(count * 3);
-
-    for (let index = 0; index < count; index++) {
-      positions[index * 3] = (Math.random() - 0.5) * 24;
-      positions[index * 3 + 1] = (Math.random() - 0.5) * 20;
-      positions[index * 3 + 2] = (Math.random() - 0.5) * 20;
-
-      colors[index * 3] = 0.2 + Math.random() * 0.12;
-      colors[index * 3 + 1] = 0.78 + Math.random() * 0.2;
-      colors[index * 3 + 2] = 0.22 + Math.random() * 0.3;
-    }
-
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-    const material = new THREE.PointsMaterial({
-      size: 0.11,
-      vertexColors: true,
-      transparent: true,
-      opacity: 0.55,
-      blending: THREE.AdditiveBlending,
-    });
-
-    const particles = new THREE.Points(geometry, material);
-    scene.add(particles);
-
-    let frameId = 0;
-    let pointerTargetX = 0;
-    let pointerTargetY = 0;
-    let pointerX = 0;
-    let pointerY = 0;
-
-    const onPointerMove = (event: PointerEvent) => {
-      pointerTargetX = (event.clientX / window.innerWidth) * 2 - 1;
-      pointerTargetY = -(event.clientY / window.innerHeight) * 2 + 1;
-    };
-
-    const onResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    };
-
-    const animate = () => {
-      frameId = window.requestAnimationFrame(animate);
-
-      pointerX += (pointerTargetX - pointerX) * 0.035;
-      pointerY += (pointerTargetY - pointerY) * 0.035;
-
-      const time = performance.now() * 0.00035;
-      particles.rotation.x = time * 0.07 + pointerY * 0.12;
-      particles.rotation.y = time * 0.1 + pointerX * 0.12;
-      material.size = 0.11 + Math.sin(time * 8) * 0.015;
-
-      renderer.render(scene, camera);
-    };
-
-    window.addEventListener('pointermove', onPointerMove, { passive: true });
-    window.addEventListener('resize', onResize);
-    animate();
-
-    return () => {
-      ctx.revert();
-      window.cancelAnimationFrame(frameId);
-      window.removeEventListener('pointermove', onPointerMove);
-      window.removeEventListener('resize', onResize);
-      geometry.dispose();
-      material.dispose();
-      renderer.dispose();
-    };
+    return () => ctx.revert();
   }, []);
 
   return (
     <div
       ref={pageRef}
-      className="relative flex min-h-screen flex-col overflow-hidden bg-transparent text-foreground selection:bg-primary/30 selection:text-primary-foreground"
+      className="relative flex min-h-screen flex-col overflow-hidden bg-[#040A07] text-foreground selection:bg-primary/30 selection:text-primary-foreground"
     >
-      <canvas ref={canvasRef} className="pointer-events-none fixed inset-0 z-0 h-full w-full" />
-      <div className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(74,222,128,0.12),transparent_38%),radial-gradient(circle_at_82%_85%,rgba(34,197,94,0.08),transparent_42%)]" />
-        <div className="absolute -top-32 left-1/2 h-[26rem] w-[26rem] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
+      <div className="pointer-events-none absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_16%,rgba(74,222,128,0.18),transparent_34%),radial-gradient(circle_at_84%_12%,rgba(34,197,94,0.12),transparent_36%),linear-gradient(145deg,#040A07_5%,#09150E_45%,#040A07_100%)]" />
+        <div className="absolute inset-0 opacity-[0.06] [background:repeating-linear-gradient(0deg,transparent,transparent_18px,rgba(255,255,255,0.6)_19px)]" />
       </div>
 
       <header className="fixed top-0 z-50 w-full border-b border-white/5 bg-[#050A06]/80 backdrop-blur-xl supports-[backdrop-filter]:bg-[#050A06]/65">
@@ -257,55 +164,99 @@ export default function LandingPage() {
       </header>
 
       <main className="relative z-10 flex-1 pt-20">
-        <section className="container mx-auto px-4 pb-10 pt-16 text-center lg:pb-12 lg:pt-20">
-          <div className="mx-auto max-w-5xl space-y-6">
-            <div className="hero-item inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-primary">
-              <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-              System Online
+        <section className="container mx-auto px-4 pb-14 pt-12 lg:pb-16 lg:pt-16">
+          <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
+            <div className="order-1">
+              <div className="hero-copy-item inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-primary">
+                <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                System Online
+              </div>
+
+              <h1 className="hero-copy-item mt-5 text-4xl font-black leading-[1.03] tracking-tight text-white sm:text-5xl lg:text-6xl xl:text-7xl">
+                Your Solo Leveling System
+                <span className="mt-2 block bg-gradient-to-r from-primary via-[#86EFAC] to-primary bg-clip-text text-transparent">
+                  with Daily AI Judgment
+                </span>
+              </h1>
+
+              <p className="hero-copy-item mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg lg:text-xl">
+                Track coding, mood, meals, sleep, and water in one place. At the end of the day, HigherMe tells you
+                what improved, what slipped, and what to fix tomorrow.
+              </p>
+
+              <p className="hero-copy-item mt-4 max-w-lg text-sm text-white/65 sm:text-base">
+                Built for solo builders who want structure without excuses.
+              </p>
+
+              <div className="mt-7 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
+                <Link href="/signup" className="hero-cta">
+                  <Button
+                    variant="lush"
+                    size="lg"
+                    className="h-14 rounded-xl border border-primary/50 px-9 text-lg font-bold shadow-[0_0_24px_rgba(74,222,128,0.32)]"
+                  >
+                    <Flame className="mr-2 h-5 w-5 fill-current" />
+                    Start Leveling
+                  </Button>
+                </Link>
+                <Link href="#systems" className="hero-cta">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="h-14 rounded-xl border-white/15 bg-white/5 px-8 text-base text-gray-200 backdrop-blur-md hover:bg-white/10 hover:text-white"
+                  >
+                    Explore Systems
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
             </div>
 
-            <h1 className="hero-item text-4xl font-black leading-[1.02] tracking-tight text-white sm:text-5xl lg:text-7xl">
-              Your Solo Leveling System
-              <span className="mt-2 block bg-gradient-to-r from-primary via-[#86EFAC] to-primary bg-clip-text text-transparent">
-                for Real Life Execution
-              </span>
-            </h1>
+            <div className="hero-media-shell order-2">
+              <article className="relative overflow-hidden rounded-[1.8rem] border border-white/10 bg-[linear-gradient(160deg,rgba(12,31,18,0.95)_0%,rgba(8,17,12,0.92)_50%,rgba(7,15,11,0.98)_100%)] p-3 shadow-[0_24px_100px_-35px_rgba(0,0,0,0.9)]">
+                <div className="relative overflow-hidden rounded-[1.25rem] border border-white/10 bg-black/30 p-5 sm:p-6">
+                  <div className="mb-5 flex items-center justify-between">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1 text-[11px] font-mono uppercase tracking-[0.12em] text-emerald-300">
+                      <span className="h-2 w-2 rounded-full bg-emerald-300" />
+                      Live Session
+                    </div>
+                    <div className="text-xs font-mono text-white/60">Today 21:14</div>
+                  </div>
 
-            <p className="hero-item mx-auto max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg lg:text-xl">
-              HigherMe helps you track coding, mood, meals, sleep, and water in one place, then gives you an AI
-              end-of-day verdict so you know exactly what to improve tomorrow.
-            </p>
+                  <div className="grid gap-3">
+                    <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                      <div className="mb-2 flex items-center justify-between text-[11px] font-mono uppercase tracking-[0.12em] text-white/55">
+                        <span>Current Level</span>
+                        <span>Lv 07</span>
+                      </div>
+                      <div className="h-2 overflow-hidden rounded-full bg-black/50">
+                        <div className="h-full w-[72%] rounded-full bg-gradient-to-r from-primary via-emerald-300 to-primary" />
+                      </div>
+                    </div>
 
-            <p className="hero-item mx-auto max-w-2xl text-sm text-white/60 sm:text-base">
-              Built like a personal judge for solo builders: fewer excuses, clearer feedback, stronger routines.
-            </p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                        <div className="text-[10px] font-mono uppercase tracking-[0.12em] text-white/55">Hydration</div>
+                        <div className="mt-1 text-lg font-bold text-white">78%</div>
+                      </div>
+                      <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                        <div className="text-[10px] font-mono uppercase tracking-[0.12em] text-white/55">Mood</div>
+                        <div className="mt-1 text-lg font-bold text-white">Stable</div>
+                      </div>
+                    </div>
 
-            <div className="flex flex-col items-center justify-center gap-4 pt-5 sm:flex-row">
-              <Link href="/signup" className="hero-action">
-                <Button
-                  variant="lush"
-                  size="lg"
-                  className="h-14 rounded-xl border border-primary/50 px-9 text-lg font-bold shadow-[0_0_24px_rgba(74,222,128,0.32)]"
-                >
-                  <Flame className="mr-2 h-5 w-5 fill-current" />
-                  Start Leveling
-                </Button>
-              </Link>
-              <Link href="#systems" className="hero-action">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="h-14 rounded-xl border-white/15 bg-white/5 px-8 text-base text-gray-200 backdrop-blur-md hover:bg-white/10 hover:text-white"
-                >
-                  Explore Systems
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
+                    <div className="rounded-xl border border-primary/20 bg-gradient-to-r from-primary/20 to-transparent p-3">
+                      <div className="text-[10px] font-mono uppercase tracking-[0.12em] text-primary">AI Verdict</div>
+                      <div className="mt-1 text-sm font-semibold text-white">Good consistency. Increase deep work block tomorrow.</div>
+                    </div>
+                  </div>
+                </div>
+              </article>
             </div>
           </div>
         </section>
 
-        <section id="systems" className="container mx-auto px-4 pb-16 pt-4 lg:pb-20 lg:pt-6">
+        <section id="systems" className="container mx-auto px-4 pb-16 pt-1 lg:pb-20 lg:pt-3">
           <div className="mx-auto max-w-6xl">
             <div className="mb-8 text-center">
               <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-primary/90">Core Systems</p>
