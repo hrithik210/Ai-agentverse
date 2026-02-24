@@ -9,7 +9,7 @@ from db.models import Level , XPEvent , CodeLog
 from datetime import datetime
 from auth.auth import get_current_user
 from db.models import User
-from auth.auth import get_password_hash , verify_password, create_access_token
+from auth.auth import get_password_hash , verify_password, create_access_token, verify_password_async, hash_password_async
 from fastapi.middleware.cors import CORSMiddleware
 
 # Configure CORS
@@ -23,7 +23,7 @@ load_dotenv()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[os.getenv("FRONTEND_URL", "http://localhost:3000")],  # Load from .env file
+    allow_origins=["*"],  # Load from .env file
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -235,8 +235,8 @@ async def register(req : Request):
                 else:
                     raise HTTPException(status_code=400 , detail="username taken")
             
-            #hashing password
-            hashed_password = get_password_hash(password)
+            #hashing password (async to avoid blocking event loop)
+            hashed_password = await hash_password_async(password)
             
             new_user = User(
                 username=username,
@@ -318,7 +318,7 @@ async def login(req : Request):
             if not user.is_active:
                 raise HTTPException(status_code=401 , detail="account deactivated")
             
-            if not verify_password(password , user.hashed_password):
+            if not await verify_password_async(password , user.hashed_password):
                 raise HTTPException(status_code=401 , detail="invalid password")
 
             token = create_access_token(data= {"sub" : user.username})

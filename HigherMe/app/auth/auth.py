@@ -7,6 +7,8 @@ from sqlalchemy.orm import Session
 from db.models import User
 from db.database import get_db_session
 import os
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -17,11 +19,24 @@ algorithm = "HS256"
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 security = HTTPBearer()
 
+# Thread pool for CPU-bound password operations
+_executor = ThreadPoolExecutor(max_workers=4)
+
 def verify_password(plain_password , hashed_password):
   return pwd_context.verify(plain_password, hashed_password)
 
 def get_password_hash(password):
   return pwd_context.hash(password)
+
+async def verify_password_async(plain_password: str, hashed_password: str) -> bool:
+  """Async password verification - runs bcrypt in thread pool to avoid blocking."""
+  loop = asyncio.get_event_loop()
+  return await loop.run_in_executor(_executor, pwd_context.verify, plain_password, hashed_password)
+
+async def hash_password_async(password: str) -> str:
+  """Async password hashing - runs bcrypt in thread pool to avoid blocking."""
+  loop = asyncio.get_event_loop()
+  return await loop.run_in_executor(_executor, pwd_context.hash, password)
 
 def create_access_token(data : dict , expire_delta : timedelta = None):
   to_encode = data.copy()

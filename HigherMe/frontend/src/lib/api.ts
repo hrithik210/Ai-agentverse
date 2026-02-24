@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
 
 class APIError extends Error {
   constructor(public status: number, message: string) {
@@ -59,14 +59,14 @@ export class ApiClient {
 
   // Auth methods
   static async login(email: string, password: string) {
-    return this.request('/auth/login', {
+    return this.request('/api/v1/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
   }
 
   static async register(username: string, email: string, password: string) {
-    return this.request('/auth/register', {
+    return this.request('/api/v1/auth/register', {
       method: 'POST',
       body: JSON.stringify({ username, email, password }),
     });
