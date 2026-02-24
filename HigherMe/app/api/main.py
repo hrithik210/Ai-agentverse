@@ -230,7 +230,7 @@ async def register(req : Request):
             ).first()
             
             if existing_user:
-                if existing_user.email:
+                if existing_user.email == email:
                     raise HTTPException(status_code=400 , detail="email already in use")
                 else:
                     raise HTTPException(status_code=400 , detail="username taken")

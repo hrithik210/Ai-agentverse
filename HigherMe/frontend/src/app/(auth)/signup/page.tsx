@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -10,19 +11,35 @@ import { Leaf, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function SignUpPage() {
-  const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login, register } = useAuth();
+  const [error, setError] = useState<string | null>(null);
+  const { register } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     setIsLoading(true);
-    // Simulate signup delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    await register(name, email, password);
-    setIsLoading(false);
+
+    // Validate username format
+    const usernameRegex = /^[a-z0-9_]+$/;
+    if (!usernameRegex.test(username) || username.length < 3) {
+      setError('Username must be at least 3 characters, lowercase letters, numbers, and underscores only');
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      await register(username, email, password);
+      router.push('/dashboard');
+    } catch (err: any) {
+      setError(err.message || 'Registration failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -58,18 +75,21 @@ export default function SignUpPage() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <label htmlFor="name" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                  Full Name
+                <label htmlFor="username" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Username
                 </label>
                 <Input
-                  id="name"
+                  id="username"
                   type="text"
-                  placeholder="John Doe"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  placeholder="johndoe123"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value.toLowerCase())}
                   className="bg-white/5 border-primary/20 focus:border-primary focus:ring-primary/20 text-white placeholder:text-muted-foreground"
                   required
                 />
+                <p className="text-xs text-muted-foreground">
+                  Lowercase letters, numbers, and underscores only
+                </p>
               </div>
               <div className="space-y-2">
                 <label htmlFor="email" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -101,8 +121,13 @@ export default function SignUpPage() {
                   Must be at least 8 characters long
                 </p>
               </div>
-              <Button 
-                type="submit" 
+              {error && (
+                <div className="p-3 rounded-md bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center">
+                  {error}
+                </div>
+              )}
+              <Button
+                type="submit"
                 className="w-full font-bold"
                 variant="lush"
                 disabled={isLoading}

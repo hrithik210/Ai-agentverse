@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -12,16 +13,23 @@ import { motion } from 'framer-motion';
 export default function SignInPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     setIsLoading(true);
-    // Simulate login delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    await login(email, password);
-    setIsLoading(false);
+    try {
+      await login(email, password);
+      router.push('/dashboard');
+    } catch (err: any) {
+      setError(err.message || 'Login failed. Please check your credentials.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -91,9 +99,14 @@ export default function SignInPage() {
                   required
                 />
               </div>
-              <Button 
-                type="submit" 
-                className="w-full font-bold" 
+              {error && (
+                <div className="p-3 rounded-md bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center">
+                  {error}
+                </div>
+              )}
+              <Button
+                type="submit"
+                className="w-full font-bold"
                 variant="lush"
                 disabled={isLoading}
               >

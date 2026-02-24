@@ -74,17 +74,17 @@ export class ApiClient {
 
   // User stats
   static async getUserStats() {
-    return this.request('/stats');
+    return this.request('/api/v1/stats');
   }
 
   // Daily report
   static async getDailyReport() {
-    return this.request('/daily-report');
+    return this.request('/api/v1/daily-report');
   }
 
   // Mood logging
   static async logMood(moodData: any) {
-    return this.request('/mood', {
+    return this.request('/api/v1/mood', {
       method: 'POST',
       body: JSON.stringify(moodData),
     });
@@ -92,28 +92,28 @@ export class ApiClient {
 
   // Health logging
   static async logMeal(mealData: any) {
-    return this.request('/health/meal', {
+    return this.request('/api/v1/health/meal', {
       method: 'POST',
       body: JSON.stringify(mealData),
     });
   }
 
   static async logExercise(exerciseData: any) {
-    return this.request('/health/exercise', {
+    return this.request('/api/v1/health/exercise', {
       method: 'POST',
       body: JSON.stringify(exerciseData),
     });
   }
 
   static async logSleep(sleepData: any) {
-    return this.request('/health/sleep', {
+    return this.request('/api/v1/health/sleep', {
       method: 'POST',
       body: JSON.stringify(sleepData),
     });
   }
 
   static async logWater(waterData: any) {
-    return this.request('/health/water', {
+    return this.request('/api/v1/health/water', {
       method: 'POST',
       body: JSON.stringify(waterData),
     });
@@ -121,11 +121,11 @@ export class ApiClient {
 
   // Code activity
   static async getCodeActivity() {
-    return this.request('/get-code-activity');
+    return this.request('/api/v1/get-code-activity');
   }
 
   static async createCodeActivity() {
-    return this.request('/create-code-activity', {
+    return this.request('/api/v1/create-code-activity', {
       method: 'POST',
     });
   }
